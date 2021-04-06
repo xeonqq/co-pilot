@@ -179,6 +179,7 @@ def main():
     led_pin = 10
     # button = Button(button_pin)
     led = Led(led_pin)
+    led.off()
     prev_cycle_time = time.perf_counter()
     with picamera.PiCamera(
         resolution="{}x{}".format(width, height), framerate=24
@@ -225,6 +226,10 @@ def main():
                 idxs = non_max_suppression(objects, args.iou_threshold)
                 for idx in idxs:
                     draw_object(draw, objects[idx])
+            if "traffic" in objects_by_label:
+                led.on()
+            else:
+                led.off()
 
             # img_origin.save("detection{}.bmp".format(i))
 
