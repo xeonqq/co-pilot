@@ -18,7 +18,9 @@ from pycoral.adapters import detect
 from pycoral.utils.dataset import read_label_file
 from pycoral.utils.edgetpu import make_interpreter
 
+from image_saver import AsyncImageSaver
 from utils import (
+    crop_and_save_object,
     tiles_location_gen,
     non_max_suppression,
     draw_object,
@@ -57,6 +59,7 @@ class CoPilot(object):
         self._led = Led(led_pin)
         self._led.off()
 
+        self._image_saver = AsyncImageSaver("detections")
         # button_pin = 8
         # button = Button(button_pin)
 
@@ -115,5 +118,8 @@ class CoPilot(object):
             idxs = non_max_suppression(objects, self._args.iou_threshold)
             for idx in idxs:
                 draw_object(draw, objects[idx])
+                if objects[idx].label == "traffic":
+                    self._image_saver.save_object(img, objects[idx])
+
         self._led.on() if "traffic" in objects_by_label else self._led.off()
         # image.save("detection{}.bmp".format(i))
