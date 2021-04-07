@@ -55,6 +55,7 @@ class CoPilot(object):
         self._led.off()
 
         self._image_saver = AsyncImageSaver("/mnt/hdd/detections")
+        self._inference_time_ms = 0
         # button_pin = 8
         # button = Button(button_pin)
 
@@ -112,7 +113,8 @@ class CoPilot(object):
                     Object(label, obj.score, bbox)
                 )
 
-        logging.debug("inference_time %.2f ms" % (inference_time * 1000))
+        self._inference_time_ms = inference_time * 1000
+        logging.debug("inference_time %.2f ms" % (self._inference_time_ms))
 
         return self._non_max_suppress(objects_by_label)
 
