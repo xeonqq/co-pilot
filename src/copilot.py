@@ -1,14 +1,11 @@
-import picamera
-from button import Button
-from led import Led
-import RPi.GPIO as GPIO
-
 import logging
 import io
 import os
 import collections
 import time
 
+import picamera
+import RPi.GPIO as GPIO
 import numpy as np
 from PIL import Image
 
@@ -17,8 +14,10 @@ from pycoral.adapters import detect
 from pycoral.utils.dataset import read_label_file
 from pycoral.utils.edgetpu import make_interpreter
 
-from image_saver import AsyncImageSaver
-from utils import (
+from .button import Button
+from .led import Led
+from .image_saver import AsyncImageSaver
+from .utils import (
     tiles_location_gen,
     non_max_suppression,
     draw_objects,

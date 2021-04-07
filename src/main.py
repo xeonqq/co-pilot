@@ -1,5 +1,5 @@
 import argparse
-from copilot import CoPilot
+from .copilot import CoPilot
 
 
 def main():
