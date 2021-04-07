@@ -5,6 +5,11 @@ from .copilot import CoPilot
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument(
+        "--thumbnail_path",
+        help="Output path for cropped objects",
+        default="/mnt/hdd/detections",
+    )
+    parser.add_argument(
         "--model",
         required=True,
         help="Detection SSD model path (must have post-processing operator).",

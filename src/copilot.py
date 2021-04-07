@@ -54,10 +54,13 @@ class CoPilot(object):
         self._led = Led(led_pin)
         self._led.off()
 
-        self._image_saver = AsyncImageSaver("/mnt/hdd/detections")
+        self._image_saver = AsyncImageSaver(args.thumbnail_path)
         self._inference_time_ms = 0
         # button_pin = 8
         # button = Button(button_pin)
+
+    def join(self):
+        self._image_saver.join()
 
     def run(self):
         prev_cycle_time = time.perf_counter()
@@ -83,11 +86,14 @@ class CoPilot(object):
                 )
                 self.process(img)
 
+    def led_on_given(self, objects_by_label, label):
+        self._led.on() if label in objects_by_label else self._led.off()
+
     def process(self, image):
         objects_by_label = self.detect(image)
-        self._led.on() if "traffic" in objects_by_label else self._led.off()
+        self.led_on_given(objects_by_label, "traffic")
         self.save_cropped_objects(image, objects_by_label, ["traffic"])
-        # self.draw_objects(image, objects_by_label)
+        # draw_objects(image, objects_by_label)
 
     def detect(self, image):
         img = image.crop(
@@ -126,10 +132,10 @@ class CoPilot(object):
                 nms_objects_by_label.setdefault(label, []).append(objects[idx])
         return nms_objects_by_label
 
-    def save_cropped_objects(self, image, objects_by_label, labels_to_save):
+    def save_cropped_objects(self, image, objects_by_label, labels_to_save, name=""):
         for label in labels_to_save:
             if label in objects_by_label:
                 for obj in objects_by_label[label]:
-                    self._image_saver.save_object(image, obj)
+                    self._image_saver.save_object(image, obj, name)
 
         # image.save("detection{}.bmp".format(i))
