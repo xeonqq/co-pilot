@@ -1,6 +1,8 @@
 import collections
 import numpy as np
 
+from PIL import ImageDraw
+
 TileConfig = collections.namedtuple(
     "TileConfig", ["tile_size", "tile_w_overlap", "tile_h_overlap"]
 )
@@ -94,6 +96,13 @@ def draw_object(draw, obj):
     draw.rectangle(obj.bbox, outline="red")
     draw.text((obj.bbox[0], obj.bbox[3]), obj.label, fill="#0000")
     draw.text((obj.bbox[0], obj.bbox[3] + 10), str(obj.score), fill="#0000")
+
+
+def draw_objects(image, objects_by_label):
+    draw = ImageDraw.Draw(image)
+    for label, objects in objects_by_label.items():
+        for obj in objects:
+            draw_object(draw, obj)
 
 
 def reposition_bounding_box(bbox, tile_location):

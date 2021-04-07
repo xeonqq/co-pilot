@@ -11,7 +11,6 @@ import time
 
 import numpy as np
 from PIL import Image
-from PIL import ImageDraw
 
 from pycoral.adapters import common
 from pycoral.adapters import detect
@@ -20,10 +19,9 @@ from pycoral.utils.edgetpu import make_interpreter
 
 from image_saver import AsyncImageSaver
 from utils import (
-    crop_and_save_object,
     tiles_location_gen,
     non_max_suppression,
-    draw_object,
+    draw_objects,
     reposition_bounding_box,
     TileConfig,
 )
@@ -32,9 +30,7 @@ from utils import (
 Object = collections.namedtuple("Object", ["label", "score", "bbox"])
 
 
-logging.basicConfig(
-    filename="{}/traffic_light_alert.log".format(os.getcwd()), level=logging.DEBUG
-)
+logging.basicConfig(filename="{}/co-pilot.log".format(os.getcwd()), level=logging.DEBUG)
 
 
 class CoPilot(object):
@@ -59,12 +55,11 @@ class CoPilot(object):
         self._led = Led(led_pin)
         self._led.off()
 
-        self._image_saver = AsyncImageSaver("detections")
+        self._image_saver = AsyncImageSaver("/mnt/hdd/detections")
         # button_pin = 8
         # button = Button(button_pin)
 
     def run(self):
-
         prev_cycle_time = time.perf_counter()
         with picamera.PiCamera(
             resolution="{}x{}".format(self._width, self._height), framerate=24
@@ -86,10 +81,15 @@ class CoPilot(object):
                 img = Image.frombuffer(
                     "RGB", (self._width, self._height), stream.getvalue()
                 )
-                self.detect(img)
+                self.process(img)
+
+    def process(self, image):
+        objects_by_label = self.detect(image)
+        self._led.on() if "traffic" in objects_by_label else self._led.off()
+        self.save_cropped_objects(image, objects_by_label, ["traffic"])
+        # self.draw_objects(image, objects_by_label)
 
     def detect(self, image):
-        draw = ImageDraw.Draw(image)
         img = image.crop(
             [0, 0, self._width, int(self._height * self._h_crop_keep_percentage)]
         )
@@ -114,12 +114,21 @@ class CoPilot(object):
                 )
 
         logging.debug("inference_time %.2f ms" % (inference_time * 1000))
+
+        return self._non_max_suppress(objects_by_label)
+
+    def _non_max_suppress(self, objects_by_label):
+        nms_objects_by_label = dict()
         for label, objects in objects_by_label.items():
             idxs = non_max_suppression(objects, self._args.iou_threshold)
             for idx in idxs:
-                draw_object(draw, objects[idx])
-                if objects[idx].label == "traffic":
-                    self._image_saver.save_object(img, objects[idx])
+                nms_objects_by_label.setdefault(label, []).append(objects[idx])
+        return nms_objects_by_label
 
-        self._led.on() if "traffic" in objects_by_label else self._led.off()
+    def save_cropped_objects(self, image, objects_by_label, labels_to_save):
+        for label in labels_to_save:
+            if label in objects_by_label:
+                for obj in objects_by_label[label]:
+                    self._image_saver.save_object(image, obj)
+
         # image.save("detection{}.bmp".format(i))

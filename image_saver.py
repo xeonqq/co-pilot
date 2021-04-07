@@ -9,7 +9,7 @@ class AsyncImageSaver(object):
 
     def __init__(self, folder):
         self._folder = folder
-        pathlib.Path("./{}".format(folder)).mkdir(parents=True, exist_ok=True)
+        pathlib.Path("{}".format(folder)).mkdir(parents=True, exist_ok=True)
         self._task_queue = queue.Queue(AsyncImageSaver.MAX_QUEUE_SIZE)
         self._thread = threading.Thread(target=self._run, daemon=True)
         self._thread.start()
