@@ -10,3 +10,6 @@ python3 -m pytest
 # or
 python3 -m tests.test_detection
 ```
+
+## References
+* SSD model is downloaded from https://github.com/google-coral/test_data/blob/master/ssd_mobilenet_v2_coco_quant_postprocess_edgetpu.tflite
