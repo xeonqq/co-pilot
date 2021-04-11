@@ -21,15 +21,20 @@ class Speaker(object):
             "red": pygame.mixer.Sound("./sounds/wife/red.wav"),
             "yellow": pygame.mixer.Sound("./sounds/wife/yellow.wav"),
             "red_yellow": pygame.mixer.Sound("./sounds/wife/red-yellow.wav"),
-            "green_left": None,
-            "red_left": None,
+            "green_left": pygame.mixer.Sound("./sounds/wife/green.wav"),
+            "red_left": pygame.mixer.Sound("./sounds/wife/red.wav"),
             "side": None,
             "none": None,
         }
+        self._prev_sound_key = None
 
     def play(self, key):
+        if key in ["side","none"]:
+            return
+
         current_time = time.time()
-        sound = self._sound_map.get(key, None)
-        if sound and current_time - self._last_played_time > 2:
+        if (key != self._prev_sound_key) or (current_time - self._last_played_time> 8):
+            sound = self._sound_map.get(key, None)
             channel = sound.play()
+            self._prev_sound_key = key
             self._last_played_time = current_time
