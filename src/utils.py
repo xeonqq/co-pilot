@@ -123,3 +123,22 @@ def reposition_bounding_box(bbox, tile_location):
     bbox[2] = bbox[2] + tile_location[0]
     bbox[3] = bbox[3] + tile_location[1]
     return bbox
+
+def crop_object(image, obj):
+    obj_crop = image.crop([obj.bbox[0], obj.bbox[1], obj.bbox[2], obj.bbox[3]])
+    return obj_crop
+
+
+def crop_objects(image, objects_by_label, labels):
+    cropped_objects = []
+    for label in labels:
+        if label in objects_by_label:
+            for obj in objects_by_label[label]:
+                cropped_objects.append(crop_object(image, obj))
+    return cropped_objects
+                
+
+
+    obj_crop = image.crop([obj.bbox[0], obj.bbox[1], obj.bbox[2], obj.bbox[3]])
+    return obj_crop
+

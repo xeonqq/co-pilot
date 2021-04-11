@@ -1,0 +1,8 @@
+green
+red
+yellow
+red_yellow
+green_left
+red_left
+side
+none

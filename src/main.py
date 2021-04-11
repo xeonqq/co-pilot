@@ -10,16 +10,29 @@ def main():
         default="/mnt/hdd/detections",
     )
     parser.add_argument(
-        "--model",
+        "--ssd_model",
         required=True,
         help="Detection SSD model path (must have post-processing operator).",
     )
-    parser.add_argument("--label", help="Labels file path.")
+    parser.add_argument(
+        "--traffic_light_classification_model",
+        required=True,
+        help="Traffic Light Classification model path",
+    )
+    parser.add_argument("--label", help="Labels file path for SSD model.")
+    parser.add_argument("--traffic_light_label", help="Labels file path for traffic light model.")
+
     parser.add_argument(
         "--score_threshold",
         help="Threshold for returning the candidates.",
         type=float,
         default=0.1,
+    )
+    parser.add_argument(
+        "--traffic_light_classification_threshold",
+        help="Threshold for classify as traffic light",
+        type=float,
+        default=0.5,
     )
     parser.add_argument(
         "--iou_threshold",
