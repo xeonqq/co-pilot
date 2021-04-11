@@ -20,6 +20,7 @@ class TestDetection(unittest.TestCase):
         args.model = "models/ssd_mobilenet_v2_coco_quant_no_nms_edgetpu.tflite"
         args.iou_threshold = 0.1
         args.score_threshold = 0.4
+        args.thumbnail_path= "."
         copilot = CoPilot(args)
 
         image = Image.open("tests/traffic_light.jpg", "r")

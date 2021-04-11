@@ -22,16 +22,6 @@ def main():
         default=0.1,
     )
     parser.add_argument(
-        "--tile_overlap",
-        help=(
-            "Number of pixels to overlap the tiles. tile_overlap should be >= "
-            "than half of the min desired object size, otherwise small objects "
-            "could be missed on the tile boundary."
-        ),
-        type=int,
-        default=15,
-    )
-    parser.add_argument(
         "--iou_threshold",
         help=("threshold to merge bounding box duing nms"),
         type=float,

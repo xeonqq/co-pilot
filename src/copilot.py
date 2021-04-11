@@ -24,6 +24,7 @@ from .utils import (
     reposition_bounding_box,
     TileConfig,
 )
+from .speaker import Speaker
 
 
 Object = collections.namedtuple("Object", ["label", "score", "bbox"])
@@ -40,6 +41,7 @@ class CoPilot(object):
         # resolution = (1280,960)
         self._interpreter = make_interpreter(self._args.model)
         self._interpreter.allocate_tensors()
+        self._speaker = Speaker()
 
         input_shape = self._interpreter.get_input_details()[0]["shape"]
         tile_w_overlap = 27
@@ -87,7 +89,11 @@ class CoPilot(object):
                 self.process(img)
 
     def led_on_given(self, objects_by_label, label):
-        self._led.on() if label in objects_by_label else self._led.off()
+        if label in objects_by_label:
+            self._led.on()
+            self._speaker.play()
+        else: 
+            self._led.off()
 
     def process(self, image):
         objects_by_label = self.detect(image)
