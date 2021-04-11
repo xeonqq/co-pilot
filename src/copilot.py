@@ -47,7 +47,9 @@ class CoPilot(object):
         self._ssd_interpreter = make_interpreter(self._args.ssd_model)
         self._ssd_interpreter.allocate_tensors()
 
-        self._classfication_interpreter = make_interpreter(self._args.traffic_light_classification_model)
+        self._classfication_interpreter = make_interpreter(
+            self._args.traffic_light_classification_model
+        )
         self._classfication_interpreter.allocate_tensors()
         self._traffic_light_size = common.input_size(self._classfication_interpreter)
 
@@ -60,7 +62,11 @@ class CoPilot(object):
         self._tile_config = TileConfig(tile_size, tile_w_overlap, tile_h_overlap)
 
         self._ssd_labels = read_label_file(self._args.label) if self._args.label else {}
-        self._traffic_light_labels = read_label_file(self._args.traffic_light_label) if self._args.traffic_light_label else {}
+        self._traffic_light_labels = (
+            read_label_file(self._args.traffic_light_label)
+            if self._args.traffic_light_label
+            else {}
+        )
 
         self._h_crop_keep_percentage = 0.6
         led_pin = 10
@@ -104,7 +110,7 @@ class CoPilot(object):
     def led_on_given(self, objects_by_label, label):
         if label in objects_by_label:
             self._led.on()
-        else: 
+        else:
             self._led.off()
 
     def process(self, image):
@@ -115,7 +121,7 @@ class CoPilot(object):
         self.led_on_given(objects_by_label, "traffic")
         # self.save_cropped_objects(object_images)
         # draw_objects(image, objects_by_label)
-    
+
     def classify_objects(self, object_images):
         for obj in object_images:
             c, score = self.classify(obj)
@@ -123,19 +129,27 @@ class CoPilot(object):
                 self._speaker.play(c)
 
     def classify(self, traffic_light_thumbnail):
-        traffic_light_resized = traffic_light_thumbnail.resize(self._traffic_light_size, Image.ANTIALIAS)
+        traffic_light_resized = traffic_light_thumbnail.resize(
+            self._traffic_light_size, Image.ANTIALIAS
+        )
         common.set_input(self._classfication_interpreter, traffic_light_resized)
         start = time.perf_counter()
         self._classfication_interpreter.invoke()
-        classes = classify.get_classes(self._classfication_interpreter, 1, self._args.traffic_light_classification_threshold)
+        classes = classify.get_classes(
+            self._classfication_interpreter,
+            1,
+            self._args.traffic_light_classification_threshold,
+        )
         classification_result = (None, 0)
         for c in classes:
-            label=self._traffic_light_labels.get(c.id, c.id)
-            logging.debug('%s: %.5f' % (label, c.score))
+            label = self._traffic_light_labels.get(c.id, c.id)
+            logging.debug("%s: %.5f" % (label, c.score))
             classification_result = (label, c.score)
-        
+
         self._traffic_light_infer_time_ms = time.perf_counter() - start
-        logging.debug("classification time %.2f ms" % (self._traffic_light_infer_time_ms))
+        logging.debug(
+            "classification time %.2f ms" % (self._traffic_light_infer_time_ms)
+        )
         return classification_result
 
     def detect(self, image):
@@ -177,7 +191,7 @@ class CoPilot(object):
 
     def save_cropped_objects(self, object_images, name=""):
         pass
-        #for obj in object_images:
+        # for obj in object_images:
         #    self._image_saver.save_object(obj, name)
 
         # image.save("detection{}.bmp".format(i))

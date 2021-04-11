@@ -20,9 +20,9 @@ class TestDetection(unittest.TestCase):
         args.ssd_model = "models/ssd_mobilenet_v2_coco_quant_no_nms_edgetpu.tflite"
         args.iou_threshold = 0.1
         args.score_threshold = 0.4
-        args.thumbnail_path= "."
+        args.thumbnail_path = "."
 
-        args.traffic_light_classification_model="models/traffic_light_edgetpu.tflite"
+        args.traffic_light_classification_model = "models/traffic_light_edgetpu.tflite"
         args.traffic_light_label = "models/traffic_light_labels.txt"
         copilot = CoPilot(args)
 

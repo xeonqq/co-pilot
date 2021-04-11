@@ -4,9 +4,9 @@
 python3 -m pip install -U pygame --user
 sudo apt-get install libsdl2-mixer-2.0-0  libsdl2-2.0-0
 ```
-## Run Detection
+## Run Co-Pilot
 ```bash
-python3 -m src.main  --model models/ssd_mobilenet_v2_coco_quant_no_nms_edgetpu.tflite  --label models/coco_labels.txt --score_threshold 0.4
+python3 -m src.main  --ssd_model models/ssd_mobilenet_v2_coco_quant_no_nms_edgetpu.tflite  --label models/coco_labels.txt --score_threshold 0.4 --traffic_light_classification_model models/traffic_light_edgetpu.tflite  --traffic_light_label models/traffic_light_labels.txt
 ```
 
 ## Test
@@ -15,6 +15,7 @@ python3 -m src.main  --model models/ssd_mobilenet_v2_coco_quant_no_nms_edgetpu.t
 python3 -m pytest
 # or
 python3 -m tests.test_detection
+python3 -m tests.test_classification
 ```
 
 ## References

@@ -19,10 +19,10 @@ class TestTrafficLightClassification(unittest.TestCase):
         args.label = "models/coco_labels.txt"
         args.ssd_model = "models/ssd_mobilenet_v2_coco_quant_no_nms_edgetpu.tflite"
 
-        args.traffic_light_classification_model="models/traffic_light_edgetpu.tflite"
+        args.traffic_light_classification_model = "models/traffic_light_edgetpu.tflite"
         args.traffic_light_label = "models/traffic_light_labels.txt"
         args.traffic_light_classification_threshold = 0.5
-        args.thumbnail_path= "."
+        args.thumbnail_path = "."
         copilot = CoPilot(args)
 
         image = Image.open("tests/traffic_light.bmp", "r")
@@ -34,7 +34,6 @@ class TestTrafficLightClassification(unittest.TestCase):
         self.assertEqual(c, "red")
         self.assertGreater(score, 0.6)
         self.assertLess(copilot._traffic_light_infer_time_ms, 1)
-
 
 
 if __name__ == "__main__":

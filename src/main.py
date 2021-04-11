@@ -20,7 +20,9 @@ def main():
         help="Traffic Light Classification model path",
     )
     parser.add_argument("--label", help="Labels file path for SSD model.")
-    parser.add_argument("--traffic_light_label", help="Labels file path for traffic light model.")
+    parser.add_argument(
+        "--traffic_light_label", help="Labels file path for traffic light model."
+    )
 
     parser.add_argument(
         "--score_threshold",
