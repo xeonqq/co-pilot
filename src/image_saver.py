@@ -7,8 +7,15 @@ import threading
 class AsyncImageSaver(object):
     MAX_QUEUE_SIZE = 50
 
-    def __init__(self, folder):
+    def __init__(self, folder, recording_folder):
         self._folder = folder
+        self._recording_foler = recording_folder
+
+        self._recording_folder = pathlib.Path(recording_folder).joinpath(
+            time.strftime("%Y%m%d-%H%M%S")
+        )
+        self._recording_folder.mkdir(parents=True, exist_ok=True)
+
         pathlib.Path("{}".format(folder)).mkdir(parents=True, exist_ok=True)
         self._task_queue = queue.Queue(AsyncImageSaver.MAX_QUEUE_SIZE)
         self._thread = threading.Thread(target=self._run, daemon=True)
@@ -21,6 +28,15 @@ class AsyncImageSaver(object):
     def _run(self):
         for task in iter(self._task_queue.get, None):
             task()
+
+    def save(self, image):
+        self._task_queue.put(lambda: self._save_image(image))
+
+    def _save_image(self, image):
+        filename = self._recording_folder.joinpath(
+            "{}.jpg".format(time.strftime("%Y%m%d-%H%M%S"))
+        )
+        image.save(filename)
 
     def save_object(self, image, obj, name):
         obj_crop = self._crop_object(image, obj)

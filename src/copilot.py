@@ -73,7 +73,7 @@ class CoPilot(object):
         self._led = Led(led_pin)
         self._led.off()
 
-        self._image_saver = AsyncImageSaver(args.thumbnail_path)
+        self._image_saver = AsyncImageSaver(args.thumbnail_path, "/mnt/hdd")
         self._ssd_infer_time_ms = 0
         self._traffic_light_infer_time_ms = 0
         # button_pin = 8
@@ -114,6 +114,9 @@ class CoPilot(object):
             self._led.off()
 
     def process(self, image):
+        # collect data
+        self._image_saver.save(image)
+
         objects_by_label = self.detect(image)
         object_images = crop_objects(image, objects_by_label, ["traffic"])
 
