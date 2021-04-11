@@ -30,6 +30,7 @@ from .speaker import Speaker
 
 
 Object = collections.namedtuple("Object", ["label", "score", "bbox"])
+TrafficLight = collections.namedtuple("TrafficLight", ["cls", "score", "obj", "image"])
 
 
 logging.basicConfig(filename="{}/co-pilot.log".format(os.getcwd()), level=logging.DEBUG)
@@ -118,18 +119,24 @@ class CoPilot(object):
         self._image_saver.save(image)
 
         objects_by_label = self.detect(image)
-        object_images = crop_objects(image, objects_by_label, ["traffic"])
 
-        self.classify_objects(object_images)
+        traffic_lights = self.classify_traffic_lights(image, objects_by_label)
         self.led_on_given(objects_by_label, "traffic")
-        # self.save_cropped_objects(object_images)
+
+        # save detection and classification result
+        self._image_saver.save_traffic_lights(traffic_lights)
         # draw_objects(image, objects_by_label)
 
-    def classify_objects(self, object_images):
-        for obj in object_images:
-            c, score = self.classify(obj)
+    def classify_traffic_lights(self, image, objects_by_label):
+        detected_traffic_lights = objects_by_label.get("traffic", [])
+        object_images = crop_objects(image, detected_traffic_lights)
+        traffic_lights = []
+        for obj_image, detection in zip(object_images, detected_traffic_lights):
+            c, score = self.classify(obj_image)
+            traffic_lights.append(TrafficLight(c, score, detection, obj_image))
             if c:
                 self._speaker.play(c)
+        return traffic_lights
 
     def classify(self, traffic_light_thumbnail):
         traffic_light_resized = traffic_light_thumbnail.resize(
@@ -193,8 +200,7 @@ class CoPilot(object):
         return nms_objects_by_label
 
     def save_cropped_objects(self, object_images, name=""):
-        pass
-        # for obj in object_images:
-        #    self._image_saver.save_object(obj, name)
+        for obj in object_images:
+            self._image_saver.save_object(obj, name)
 
         # image.save("detection{}.bmp".format(i))

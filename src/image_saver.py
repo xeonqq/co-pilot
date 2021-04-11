@@ -9,12 +9,13 @@ class AsyncImageSaver(object):
 
     def __init__(self, folder, recording_folder):
         self._folder = folder
-        self._recording_foler = recording_folder
 
         self._recording_folder = pathlib.Path(recording_folder).joinpath(
             time.strftime("%Y%m%d-%H%M%S")
         )
         self._recording_folder.mkdir(parents=True, exist_ok=True)
+        self._rec_detection_folder = self._recording_folder.joinpath("detection")
+        self._rec_detection_folder.mkdir(parents=True, exist_ok=True)
 
         pathlib.Path("{}".format(folder)).mkdir(parents=True, exist_ok=True)
         self._task_queue = queue.Queue(AsyncImageSaver.MAX_QUEUE_SIZE)
@@ -27,10 +28,22 @@ class AsyncImageSaver(object):
 
     def _run(self):
         for task in iter(self._task_queue.get, None):
+            # current frame rate is ~1 fps
+            time.sleep(0.1)
             task()
 
     def save(self, image):
         self._task_queue.put(lambda: self._save_image(image))
+
+    def save_traffic_lights(self, traffic_lights):
+        self._task_queue.put(lambda: self._save_traffic_lights(traffic_lights))
+
+    def _save_traffic_lights(self, traffic_lights):
+        for t in traffic_lights:
+            filename = self._rec_detection_folder.joinpath(
+                "{}_{}_{}.bmp".format(t.cls, t.score, time.strftime("%Y%m%d-%H%M%S"))
+            )
+            t.image.save(filename)
 
     def _save_image(self, image):
         filename = self._recording_folder.joinpath(
