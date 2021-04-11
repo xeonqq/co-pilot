@@ -39,9 +39,10 @@ class AsyncImageSaver(object):
         self._task_queue.put(lambda: self._save_traffic_lights(traffic_lights))
 
     def _save_traffic_lights(self, traffic_lights):
+        ti = time.strftime("%Y%m%d-%H%M%S")
         for t in traffic_lights:
             filename = self._rec_detection_folder.joinpath(
-                "{}_{}_{}.bmp".format(t.cls, t.score, time.strftime("%Y%m%d-%H%M%S"))
+                "{}_{}_{}.bmp".format(t.cls, t.score, ti)
             )
             t.image.save(filename)
 
