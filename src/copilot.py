@@ -41,8 +41,6 @@ class CoPilot(object):
         self._args = args
         self._width = 1120  # 35 * 32, must be multiple of 32
         self._height = 848  # 53 * 16, must be multiple of 16
-        self._traffic_light_width = 16
-        self._traffic_light_height = 32
 
         # resolution = (1280,960)
         self._ssd_interpreter = make_interpreter(self._args.ssd_model)
@@ -80,6 +78,7 @@ class CoPilot(object):
         # button_pin = 8
         # button = Button(button_pin)
         self._speaker.play("ready")
+        logging.info("Starting jounery on {}".format(time.strftime("%Y%m%d-%H%M%S")))
 
     def join(self):
         self._image_saver.join()
@@ -119,9 +118,9 @@ class CoPilot(object):
         self._image_saver.save(image)
 
         objects_by_label = self.detect(image)
+        self.led_on_given(objects_by_label, "traffic")
 
         traffic_lights = self.classify_traffic_lights(image, objects_by_label)
-        self.led_on_given(objects_by_label, "traffic")
 
         # save detection and classification result
         self._image_saver.save_traffic_lights(traffic_lights)
