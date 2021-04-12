@@ -4,5 +4,7 @@ yellow
 red_yellow
 green_left
 red_left
+green_right
+red_right
 side
 none
