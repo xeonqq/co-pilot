@@ -14,10 +14,6 @@ class CameraCapturer(object):
         self._thread = threading.Thread(target=self._run, daemon=True)
         self._thread.start()
 
-    # def pop_image(self):
-    #    for image in iter(self._images.get, None):
-    #        return image
-
     def _run(self):
         while True:
             if self._is_recording_query_func():
