@@ -6,5 +6,6 @@ green_left
 red_left
 green_right
 red_right
+pedestrian
 side
 none
