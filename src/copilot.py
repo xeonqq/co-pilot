@@ -1,12 +1,11 @@
 import logging
-import io
 import os
 import collections
 import time
+import queue
+import pathlib
 
 import picamera
-import RPi.GPIO as GPIO
-import numpy as np
 from PIL import Image
 
 from pycoral.adapters import common
@@ -15,18 +14,20 @@ from pycoral.adapters import classify
 from pycoral.utils.dataset import read_label_file
 from pycoral.utils.edgetpu import make_interpreter
 
-from .button import Button
+# from .button import Button
 from .led import Led
 from .image_saver import AsyncImageSaver
 from .utils import (
     crop_objects,
     tiles_location_gen,
     non_max_suppression,
-    draw_objects,
     reposition_bounding_box,
     TileConfig,
+    #    draw_objects,
 )
 from .speaker import Speaker
+from .camera_recorder import CameraRecorder
+from .camera_capturer import CameraCapturer
 
 
 Object = collections.namedtuple("Object", ["label", "score", "bbox"])
@@ -72,7 +73,26 @@ class CoPilot(object):
         self._led = Led(led_pin)
         self._led.off()
 
-        self._image_saver = AsyncImageSaver(args.thumbnail_path, "/mnt/hdd")
+        self._blackbox_folder = pathlib.Path("/mnt/hdd").joinpath(
+            time.strftime("%Y%m%d-%H%M%S")
+        )
+        self._image_saver = AsyncImageSaver(args.thumbnail_path, self._blackbox_folder)
+
+        self._images = queue.Queue(1)
+        self._camera = picamera.PiCamera()
+        self._camera.resolution = (self._width, self._height)
+
+        # fps for recording
+        self._camera.framerate = 20
+        self._camera.vflip = True
+
+        self._camera_recorder = CameraRecorder(
+            self._camera, self._led, self._blackbox_folder
+        )
+        self._camera_capturer = CameraCapturer(
+            self._camera, 5, self._camera_recorder.is_recording, self._images
+        )
+
         self._ssd_infer_time_ms = 0
         self._traffic_light_infer_time_ms = 0
         # button_pin = 8
@@ -85,27 +105,13 @@ class CoPilot(object):
 
     def run(self):
         prev_cycle_time = time.perf_counter()
-        with picamera.PiCamera(
-            resolution="{}x{}".format(self._width, self._height), framerate=24
-        ) as camera:
-            camera.vflip = True
-            stream = io.BytesIO()
-            for _ in camera.capture_continuous(
-                stream, format="rgb", use_video_port=True
-            ):
-                current_cycle_time = time.perf_counter()
-                logging.debug(
-                    "cycle time %.2f ms"
-                    % ((current_cycle_time - prev_cycle_time) * 1000)
-                )
-                prev_cycle_time = current_cycle_time
-
-                stream.truncate()
-                stream.seek(0)
-                img = Image.frombuffer(
-                    "RGB", (self._width, self._height), stream.getvalue()
-                )
-                self.process(img)
+        for image in iter(self._images.get, None):
+            current_cycle_time = time.perf_counter()
+            logging.debug(
+                "cycle time %.2f ms" % ((current_cycle_time - prev_cycle_time) * 1000)
+            )
+            prev_cycle_time = current_cycle_time
+            self.process(image)
 
     def led_on_given(self, objects_by_label, label):
         if label in objects_by_label:
@@ -115,7 +121,7 @@ class CoPilot(object):
 
     def process(self, image):
         # collect data
-        self._image_saver.save(image)
+        # self._image_saver.save(image)
 
         objects_by_label = self.detect(image)
         self.led_on_given(objects_by_label, "traffic")

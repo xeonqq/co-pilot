@@ -5,14 +5,12 @@ import threading
 
 
 class AsyncImageSaver(object):
-    MAX_QUEUE_SIZE = 50
+    MAX_QUEUE_SIZE = 10
 
     def __init__(self, folder, recording_folder):
         self._folder = folder
 
-        self._recording_folder = pathlib.Path(recording_folder).joinpath(
-            time.strftime("%Y%m%d-%H%M%S")
-        )
+        self._recording_folder = recording_folder
         self._recording_folder.mkdir(parents=True, exist_ok=True)
         self._rec_detection_folder = self._recording_folder.joinpath("detection")
         self._rec_detection_folder.mkdir(parents=True, exist_ok=True)
