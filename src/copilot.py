@@ -28,6 +28,7 @@ from .utils import (
 from .speaker import Speaker
 from .camera_recorder import CameraRecorder
 from .camera_capturer import CameraCapturer
+from .camera_info import CameraInfo
 
 
 Object = collections.namedtuple("Object", ["label", "score", "bbox"])
@@ -39,9 +40,12 @@ logging.basicConfig(filename="{}/co-pilot.log".format(os.getcwd()), level=loggin
 
 class CoPilot(object):
     def __init__(self, args):
+        self._camera_info = CameraInfo("config/intrinsics.yml")
+        assert self._camera_info.resolution == (
+            1120,  # 35 * 32, must be multiple of 32
+            848,
+        )  # 53 * 16, must be multiple of 16
         self._args = args
-        self._width = 1120  # 35 * 32, must be multiple of 32
-        self._height = 848  # 53 * 16, must be multiple of 16
 
         # resolution = (1280,960)
         self._ssd_interpreter = make_interpreter(self._args.ssd_model)
@@ -80,7 +84,7 @@ class CoPilot(object):
 
         self._images = queue.Queue(1)
         self._camera = picamera.PiCamera()
-        self._camera.resolution = (self._width, self._height)
+        self._camera.resolution = self._camera_info.resolution
 
         # fps for recording
         self._camera.framerate = 20
@@ -172,7 +176,12 @@ class CoPilot(object):
 
     def detect(self, image):
         img = image.crop(
-            [0, 0, self._width, int(self._height * self._h_crop_keep_percentage)]
+            [
+                0,
+                0,
+                self._camera_info.width,
+                int(self._camera_info.height * self._h_crop_keep_percentage),
+            ]
         )
 
         inference_time = 0
