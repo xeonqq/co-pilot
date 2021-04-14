@@ -17,6 +17,15 @@ class CameraInfo(object):
                 [self._intrinsics[0, -1], self._intrinsics[1, -1]]
             )
 
+    def pixel_to_camera_frame(self, pixel):
+        return np.asarray(
+            [
+                pixel[0] - self._pixel_center[0],
+                pixel[1] - self._pixel_center[1],
+                self._f,
+            ]
+        )
+
     @property
     def f(self):
         return self._f

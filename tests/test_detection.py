@@ -37,7 +37,6 @@ class TestDetection(unittest.TestCase):
         objects_by_label = copilot.detect(image)
 
         self.assertTrue(len(objects_by_label["traffic"]) >= 2)
-        self.assertTrue(len(objects_by_label["car"]) >= 2)
         self.assertLess(copilot._ssd_infer_time_ms, 1000)
 
         draw_objects(image, objects_by_label)

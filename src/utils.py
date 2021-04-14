@@ -1,7 +1,8 @@
 import collections
+import pathlib
 import numpy as np
 
-from PIL import ImageDraw
+from PIL import ImageDraw, Image
 
 TileConfig = collections.namedtuple(
     "TileConfig", ["tile_size", "tile_w_overlap", "tile_h_overlap"]
@@ -188,3 +189,13 @@ def crop_object(image, obj):
 
 def crop_objects(image, objects):
     return [crop_object(image, obj) for obj in objects]
+
+def image_gen(image_folder_path, camera_info):
+    path_to_test_images = pathlib.Path(image_folder_path)
+    image_paths = sorted(list(path_to_test_images.glob("*.jpg")))
+    for image_path in image_paths:
+        image = Image.open(image_path, "r").convert("RGB")
+        image.resize(camera_info.resolution)
+        yield image
+
+
