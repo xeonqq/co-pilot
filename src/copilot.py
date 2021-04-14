@@ -73,7 +73,7 @@ class CoPilot(object):
         self._led = Led(led_pin)
         self._led.off()
 
-        self._blackbox_folder = pathlib.Path("./").joinpath(
+        self._blackbox_folder = pathlib.Path(self._args.blackbox_path).joinpath(
             time.strftime("%Y%m%d-%H%M%S")
         )
         self._image_saver = AsyncImageSaver(self._blackbox_folder)

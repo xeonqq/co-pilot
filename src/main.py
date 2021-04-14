@@ -5,9 +5,9 @@ from .copilot import CoPilot
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--thumbnail_path",
-        help="Output path for cropped objects",
-        default="/mnt/hdd/detections",
+        "--blackbox_path",
+        help="Output path for blackbox (images, detections, video)",
+        default="/mnt/hdd",
     )
     parser.add_argument(
         "--ssd_model",
