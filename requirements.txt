@@ -1,0 +1,9 @@
+numpy==1.16.2
+picamera==1.13
+Pillow==5.4.1
+pycoral==1.0.1
+pygame==2.0.1
+pytest==6.2.3
+PyYAML==5.4.1
+RPi.GPIO==0.7.0
+tflite-runtime==2.5.0
