@@ -1,21 +1,20 @@
 import time
+from datetime import datetime
 import queue
 import pathlib
 import threading
 
 
 class AsyncImageSaver(object):
-    MAX_QUEUE_SIZE = 10
+    MAX_QUEUE_SIZE = 20
 
-    def __init__(self, folder, recording_folder):
-        self._folder = folder
+    def __init__(self, recording_folder):
 
         self._recording_folder = recording_folder
         self._recording_folder.mkdir(parents=True, exist_ok=True)
         self._rec_detection_folder = self._recording_folder.joinpath("detection")
         self._rec_detection_folder.mkdir(parents=True, exist_ok=True)
 
-        pathlib.Path("{}".format(folder)).mkdir(parents=True, exist_ok=True)
         self._task_queue = queue.Queue(AsyncImageSaver.MAX_QUEUE_SIZE)
         self._thread = threading.Thread(target=self._run, daemon=True)
         self._thread.start()
@@ -30,39 +29,18 @@ class AsyncImageSaver(object):
             time.sleep(0.1)
             task()
 
-    def save(self, image):
-        self._task_queue.put(lambda: self._save_image(image))
+    def save_image_and_traffic_lights(self, image, traffic_lights):
+        ti = datetime.now().strftime("%Y%m%d-%H%M%S.%f")[:-3]
+        self._task_queue.put(lambda: self._save_image(image, ti))
+        self._task_queue.put(lambda: self._save_traffic_lights(traffic_lights, ti))
 
-    def save_traffic_lights(self, traffic_lights):
-        self._task_queue.put(lambda: self._save_traffic_lights(traffic_lights))
-
-    def _save_traffic_lights(self, traffic_lights):
-        ti = time.strftime("%Y%m%d-%H%M%S")
+    def _save_traffic_lights(self, traffic_lights, name_prefix):
         for t in traffic_lights:
             filename = self._rec_detection_folder.joinpath(
-                "{}_{}_{}.bmp".format(ti, t.cls, t.score)
+                "{}_{}_{}.bmp".format(name_prefix, t.cls, t.score)
             )
             t.image.save(filename)
 
-    def _save_image(self, image):
-        filename = self._recording_folder.joinpath(
-            "{}.jpg".format(time.strftime("%Y%m%d-%H%M%S"))
-        )
+    def _save_image(self, image, name_prefix):
+        filename = self._rec_detection_folder.joinpath("{}_img.jpg".format(name_prefix))
         image.save(filename)
-
-    def save_object(self, image, obj, name):
-        obj_crop = self._crop_object(image, obj)
-        self._task_queue.put(lambda: self._save_object(obj_crop, obj, name))
-
-    def _crop_object(self, image, obj):
-        obj_crop = image.crop([obj.bbox[0], obj.bbox[1], obj.bbox[2], obj.bbox[3]])
-        return obj_crop
-
-    def _save_object(self, obj_crop, obj, name):
-        if name == "":
-            name = time.strftime("%Y%m%d-%H%M%S")
-        filename = "{}/{}_{}.bmp".format(self._folder, obj.label, name)
-        obj_crop.save(filename)
-
-    def _crop_and_save_object(self, image, obj, name):
-        self._save_object(self._crop_object(image, obj), obj, name)

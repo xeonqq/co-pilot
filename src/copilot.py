@@ -23,7 +23,7 @@ from .utils import (
     non_max_suppression,
     reposition_bounding_box,
     TileConfig,
-    #    draw_objects,
+    draw_objects,
 )
 from .speaker import Speaker
 from .camera_recorder import CameraRecorder
@@ -73,10 +73,10 @@ class CoPilot(object):
         self._led = Led(led_pin)
         self._led.off()
 
-        self._blackbox_folder = pathlib.Path("/mnt/hdd").joinpath(
+        self._blackbox_folder = pathlib.Path("./").joinpath(
             time.strftime("%Y%m%d-%H%M%S")
         )
-        self._image_saver = AsyncImageSaver(args.thumbnail_path, self._blackbox_folder)
+        self._image_saver = AsyncImageSaver(self._blackbox_folder)
 
         self._images = queue.Queue(1)
         self._camera = picamera.PiCamera()
@@ -113,24 +113,27 @@ class CoPilot(object):
             prev_cycle_time = current_cycle_time
             self.process(image)
 
-    def led_on_given(self, objects_by_label, label):
+    def _led_on_given(self, objects_by_label, label):
         if label in objects_by_label:
             self._led.on()
         else:
             self._led.off()
 
+    def _log_blackbox(self, image, traffic_lights, objects_by_label):
+        # save image with detection overlay,
+        # as well as cropped detection and classification result
+        if traffic_lights:
+            draw_objects(image, objects_by_label)
+            self._image_saver.save_image_and_traffic_lights(image, traffic_lights)
+
     def process(self, image):
-        # collect data
-        # self._image_saver.save(image)
 
         objects_by_label = self.detect(image)
-        self.led_on_given(objects_by_label, "traffic")
+        self._led_on_given(objects_by_label, "traffic")
 
         traffic_lights = self.classify_traffic_lights(image, objects_by_label)
 
-        # save detection and classification result
-        self._image_saver.save_traffic_lights(traffic_lights)
-        # draw_objects(image, objects_by_label)
+        self._log_blackbox(image, traffic_lights, objects_by_label)
 
     def classify_traffic_lights(self, image, objects_by_label):
         detected_traffic_lights = objects_by_label.get("traffic", [])
