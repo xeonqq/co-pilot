@@ -5,8 +5,8 @@ from PIL import Image
 
 
 class CameraCapturer(object):
-    def __init__(self, camera, fps, is_recording_query_func, subscriber_queue):
-        self._queue = subscriber_queue
+    def __init__(self, camera, fps, is_recording_query_func, pubsub):
+        self._pubsub = pubsub
         self._camera = camera
         self._dt = 1.0 / fps
         self._resolution = self._camera.resolution
@@ -30,5 +30,5 @@ class CameraCapturer(object):
                 stream.truncate()
                 stream.seek(0)
                 img = Image.frombuffer("RGB", self._resolution, stream.getvalue())
-                self._queue.put(img)
+                self._pubsub.publish(img)
                 time.sleep(self._dt)

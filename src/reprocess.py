@@ -1,18 +1,41 @@
+import os
+import time
 import argparse
 import pathlib
-import time
+from videoio import VideoReader
+from PIL import Image
 
-import picamera
-
-from .led import Led
-from .camera_capturer import CameraCapturer
-from .camera_recorder import CameraRecorder
+from .copilot import CoPilot
 from .pubsub import PubSub
 from .camera_info import CameraInfo
-from .copilot import CoPilot
+from .whitebox import WhiteBox
 from .image_saver import AsyncImageSaver
-from .blackbox import BlackBox
 
+class LedMock(object):
+    def on(self):
+        pass
+    
+    def off(self):
+        pass
+
+    def toggle(self):
+        pass
+
+def reprocess(args):
+
+    pubsub = PubSub()
+    camera_info = CameraInfo("config/intrinsics.yml")
+    image_saver = AsyncImageSaver(args.blackbox_path)
+    whitebox = WhiteBox(image_saver)
+    copilot = CoPilot(args, pubsub, whitebox, camera_info, LedMock())
+
+    for frame in VideoReader(args.video):
+        image = Image.fromarray(frame)
+        image = image.transpose(method=Image.FLIP_TOP_BOTTOM)
+        copilot.process(image)
+        #if args.real_time:
+        #    time.sleep(0.05)
+    copilot.join()
 
 
 def parse_arguments():
@@ -55,36 +78,27 @@ def parse_arguments():
         type=float,
         default=0.1,
     )
-    return parser.parse_args()
 
+    parser.add_argument(
+        "--video",
+        required=True,
+        help="path to the video to be reprocessed",
+    )
+
+    parser.add_argument(
+        "--real_time",
+        action="store_true",
+        help="use real time reprocessing",
+    )
+
+    return parser.parse_args()
 
 def main():
     args = parse_arguments()
     args.blackbox_path = pathlib.Path(args.blackbox_path).joinpath(
                 time.strftime("%Y%m%d-%H%M%S")
     )
-
-    camera_info = CameraInfo("config/intrinsics.yml")
-    pubsub = PubSub()
-    image_saver = AsyncImageSaver(args.blackbox_path)
-    blackbox = BlackBox(image_saver)
-
-    with picamera.PiCamera() as camera:
-        # fps for recording
-        camera.framerate = 20
-        camera.vflip = True
-        camera.resolution = camera_info.resolution
-
-        led_pin = 10
-        led = Led(led_pin)
-        camera_recorder = CameraRecorder(
-            camera, led, args.blackbox_path
-        )
-        camera_capturer = CameraCapturer(
-            camera, 5, camera_recorder.is_recording, pubsub
-        )
-        copilot = CoPilot(args, pubsub, blackbox, camera_info, led)
-        copilot.run()
+    reprocess(args)
 
 
 if __name__ == "__main__":

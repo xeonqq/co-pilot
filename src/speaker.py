@@ -16,7 +16,7 @@ class Speaker(object):
         self._last_played_time = 0
         self._sound_tracks = {
             "visibility_clear": pygame.mixer.Sound(
-                "./sounds/red-alert/visibility-clear.mp3"
+                "./sounds/red-alert/visibility-clear.wav"
             ),
             "1-up": pygame.mixer.Sound("./sounds/mario/smb_1-up.wav"),
             "green": pygame.mixer.Sound("./sounds/wife/green.wav"),

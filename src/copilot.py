@@ -2,10 +2,7 @@ import logging
 import os
 import collections
 import time
-import queue
-import pathlib
 
-import picamera
 from PIL import Image
 
 from pycoral.adapters import common
@@ -15,7 +12,6 @@ from pycoral.utils.dataset import read_label_file
 from pycoral.utils.edgetpu import make_interpreter
 
 # from .button import Button
-from .led import Led
 from .image_saver import AsyncImageSaver
 from .utils import (
     crop_objects,
@@ -26,9 +22,6 @@ from .utils import (
     draw_objects,
 )
 from .speaker import Speaker
-from .camera_recorder import CameraRecorder
-from .camera_capturer import CameraCapturer
-from .camera_info import CameraInfo
 
 
 Object = collections.namedtuple("Object", ["label", "score", "bbox"])
@@ -39,13 +32,15 @@ logging.basicConfig(filename="{}/co-pilot.log".format(os.getcwd()), level=loggin
 
 
 class CoPilot(object):
-    def __init__(self, args):
-        self._camera_info = CameraInfo("config/intrinsics.yml")
+    def __init__(self, args, pubsub, blackbox, camera_info, led):
+        self._camera_info = camera_info
         assert self._camera_info.resolution == (
             1120,  # 35 * 32, must be multiple of 32
             848,
         )  # 53 * 16, must be multiple of 16
         self._args = args
+        self._pubsub = pubsub
+        self._blackbox = blackbox
 
         # resolution = (1280,960)
         self._ssd_interpreter = make_interpreter(self._args.ssd_model)
@@ -73,29 +68,8 @@ class CoPilot(object):
         )
 
         self._h_crop_keep_percentage = 0.6
-        led_pin = 10
-        self._led = Led(led_pin)
+        self._led = led
         self._led.off()
-
-        self._blackbox_folder = pathlib.Path(self._args.blackbox_path).joinpath(
-            time.strftime("%Y%m%d-%H%M%S")
-        )
-        self._image_saver = AsyncImageSaver(self._blackbox_folder)
-
-        self._images = queue.Queue(1)
-        self._camera = picamera.PiCamera()
-        self._camera.resolution = self._camera_info.resolution
-
-        # fps for recording
-        self._camera.framerate = 20
-        self._camera.vflip = True
-
-        self._camera_recorder = CameraRecorder(
-            self._camera, self._led, self._blackbox_folder
-        )
-        self._camera_capturer = CameraCapturer(
-            self._camera, 5, self._camera_recorder.is_recording, self._images
-        )
 
         self._ssd_infer_time_ms = 0
         self._traffic_light_infer_time_ms = 0
@@ -104,12 +78,9 @@ class CoPilot(object):
         self._speaker.play("ready")
         logging.info("Starting jounery on {}".format(time.strftime("%Y%m%d-%H%M%S")))
 
-    def join(self):
-        self._image_saver.join()
-
     def run(self):
         prev_cycle_time = time.perf_counter()
-        for image in iter(self._images.get, None):
+        for image in iter(self._pubsub.get, None):
             current_cycle_time = time.perf_counter()
             logging.debug(
                 "cycle time %.2f ms" % ((current_cycle_time - prev_cycle_time) * 1000)
@@ -123,13 +94,6 @@ class CoPilot(object):
         else:
             self._led.off()
 
-    def _log_blackbox(self, image, traffic_lights, objects_by_label):
-        # save image with detection overlay,
-        # as well as cropped detection and classification result
-        if traffic_lights:
-            draw_objects(image, objects_by_label)
-            self._image_saver.save_image_and_traffic_lights(image, traffic_lights)
-
     def process(self, image):
 
         objects_by_label = self.detect(image)
@@ -137,7 +101,7 @@ class CoPilot(object):
 
         traffic_lights = self.classify_traffic_lights(image, objects_by_label)
 
-        self._log_blackbox(image, traffic_lights, objects_by_label)
+        self._blackbox.log(image, traffic_lights, objects_by_label)
 
     def classify_traffic_lights(self, image, objects_by_label):
         detected_traffic_lights = objects_by_label.get("traffic", [])
