@@ -28,9 +28,6 @@ Object = collections.namedtuple("Object", ["label", "score", "bbox"])
 TrafficLight = collections.namedtuple("TrafficLight", ["cls", "score", "obj", "image"])
 
 
-logging.basicConfig(filename="{}/co-pilot.log".format(os.getcwd()), level=logging.DEBUG)
-
-
 class CoPilot(object):
     def __init__(self, args, pubsub, blackbox, camera_info, led):
         self._camera_info = camera_info

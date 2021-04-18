@@ -1,4 +1,5 @@
 import argparse
+import logging
 import pathlib
 import time
 
@@ -12,7 +13,6 @@ from .camera_info import CameraInfo
 from .copilot import CoPilot
 from .image_saver import AsyncImageSaver
 from .blackbox import BlackBox
-
 
 
 def parse_arguments():
@@ -61,12 +61,17 @@ def parse_arguments():
 def main():
     args = parse_arguments()
     args.blackbox_path = pathlib.Path(args.blackbox_path).joinpath(
-                time.strftime("%Y%m%d-%H%M%S")
+        time.strftime("%Y%m%d-%H%M%S")
     )
+    args.blackbox_path.mkdir(parents=True, exist_ok=True)
+
+    log_path = args.blackbox_path.joinpath("co-pilot.log")
+    logging.basicConfig(filename=str(log_path), level=logging.DEBUG)
 
     camera_info = CameraInfo("config/intrinsics.yml")
     pubsub = PubSub()
     image_saver = AsyncImageSaver(args.blackbox_path)
+
     blackbox = BlackBox(image_saver)
 
     with picamera.PiCamera() as camera:
@@ -74,12 +79,11 @@ def main():
         camera.framerate = 20
         camera.vflip = True
         camera.resolution = camera_info.resolution
+        camera.exposure_mode = "sports"
 
         led_pin = 10
         led = Led(led_pin)
-        camera_recorder = CameraRecorder(
-            camera, led, args.blackbox_path
-        )
+        camera_recorder = CameraRecorder(camera, led, args.blackbox_path)
         camera_capturer = CameraCapturer(
             camera, 5, camera_recorder.is_recording, pubsub
         )

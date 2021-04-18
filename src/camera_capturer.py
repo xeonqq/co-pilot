@@ -1,4 +1,5 @@
 import io
+import logging
 import time
 import threading
 from PIL import Image
@@ -31,4 +32,5 @@ class CameraCapturer(object):
                 stream.seek(0)
                 img = Image.frombuffer("RGB", self._resolution, stream.getvalue())
                 self._pubsub.publish(img)
+                logging.debug("exposure_speed:{}".format(self._camera.exposure_speed))
                 time.sleep(self._dt)
