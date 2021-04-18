@@ -18,7 +18,7 @@ python3 -m tests.test_detection
 python3 -m tests.test_classification
 ```
 
-## Reprocess with recorded video
+## Reprocess with recorded video (On Host PC)
 
 Build and run docker container
 ```bash
@@ -29,7 +29,7 @@ Build and run docker container
 In docker container
 ```bash
 cd workspace
-python3   -m src.reprocess  --ssd_model models/ssd_mobilenet_v2_coco_quant_no_nms_edgetpu.tflite  --label models/coco_labels.txt --score_threshold 0.4 --traffic_light_classification_model models/traffic_light_edgetpu.tflite  --traffic_light_label models/traffic_light_labels.txt --blackbox_path=./ --video recording_20210417-090028.h264.mp4 --real_time
+python3 -m src.reprocess  --ssd_model models/ssd_mobilenet_v2_coco_quant_no_nms_edgetpu.tflite  --label models/coco_labels.txt --score_threshold 0.4 --traffic_light_classification_model models/traffic_light_edgetpu.tflite  --traffic_light_label models/traffic_light_labels.txt --blackbox_path=./ --video recording_20210417-090028.h264.mp4 --real_time
 ```
 
 ## References
