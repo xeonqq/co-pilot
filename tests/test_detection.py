@@ -7,6 +7,8 @@ from PIL import Image
 
 from src.copilot import CoPilot
 from src.utils import draw_objects
+from src.camera_info import CameraInfo
+from src.abc import ILed
 
 
 class Args(object):
@@ -24,10 +26,13 @@ class TestDetection(unittest.TestCase):
 
         args.traffic_light_classification_model = "models/traffic_light_edgetpu.tflite"
         args.traffic_light_label = "models/traffic_light_labels.txt"
-        copilot = CoPilot(args)
+
+        camera_info = CameraInfo("config/intrinsics.yml")
+
+        copilot = CoPilot(args, None, None, camera_info, ILed())
 
         image = Image.open("tests/traffic_light_scene.jpg", "r")
-        image = image.resize((copilot._width, copilot._height))
+        image = image.resize(camera_info.resolution)
 
         objects_by_label = copilot.detect(image)
 

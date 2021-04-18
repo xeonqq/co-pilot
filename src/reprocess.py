@@ -10,16 +10,7 @@ from .pubsub import PubSub
 from .camera_info import CameraInfo
 from .whitebox import WhiteBox
 from .image_saver import AsyncImageSaver
-
-class LedMock(object):
-    def on(self):
-        pass
-    
-    def off(self):
-        pass
-
-    def toggle(self):
-        pass
+from .abs import ILed
 
 def reprocess(args):
 
@@ -27,7 +18,7 @@ def reprocess(args):
     camera_info = CameraInfo("config/intrinsics.yml")
     image_saver = AsyncImageSaver(args.blackbox_path)
     whitebox = WhiteBox(image_saver)
-    copilot = CoPilot(args, pubsub, whitebox, camera_info, LedMock())
+    copilot = CoPilot(args, pubsub, whitebox, camera_info, ILed())
 
     for frame in VideoReader(args.video):
         image = Image.fromarray(frame)

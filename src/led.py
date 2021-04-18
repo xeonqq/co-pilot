@@ -1,7 +1,8 @@
 import RPi.GPIO as GPIO
+from .abc import ILed
 
 # will use pin 10
-class Led(object):
+class Led(ILed):
     def __init__(self, pin):
         self._pin = pin
         GPIO.setmode(GPIO.BOARD)  # Use physical pin numbering
