@@ -35,7 +35,6 @@ def reprocess(args):
         copilot.process(image)
         #if args.real_time:
         #    time.sleep(0.05)
-    copilot.join()
 
 
 def parse_arguments():
