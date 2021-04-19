@@ -10,7 +10,7 @@ from .pubsub import PubSub
 from .camera_info import CameraInfo
 from .whitebox import WhiteBox
 from .image_saver import AsyncImageSaver
-from .abs import ILed
+from .abc import ILed
 
 def reprocess(args):
 
