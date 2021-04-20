@@ -6,6 +6,8 @@ from PIL import ImageDraw
 TileConfig = collections.namedtuple(
     "TileConfig", ["tile_size", "tile_w_overlap", "tile_h_overlap"]
 )
+Object = collections.namedtuple("Object", ["label", "score", "bbox"])
+TrafficLight = collections.namedtuple("TrafficLight", ["cls", "score", "obj", "image"])
 
 
 def tiles_location_gen(img_size, tile_config):
@@ -36,6 +38,60 @@ def tiles_location_gen(img_size, tile_config):
             xmax = min(img_width, w + tile_config.tile_size)
             ymax = min(img_height, h + tile_config.tile_size)
             yield [xmin, ymin, xmax, ymax]
+
+
+def union_of_intersected_objects(objects, threshold):
+    if len(objects) == 1:
+        return objects
+
+    union_of_objects = []
+    boxes = np.array([o.bbox for o in objects])
+    xmins = boxes[:, 0]
+    ymins = boxes[:, 1]
+    xmaxs = boxes[:, 2]
+    ymaxs = boxes[:, 3]
+
+    areas = (xmaxs - xmins) * (ymaxs - ymins)
+    scores = [o.score for o in objects]
+    idxs = np.argsort(scores)
+
+    while idxs.size != 0:
+
+        selected_idx = idxs[-1]
+        max_prob_object = objects[selected_idx]
+
+        overlapped_xmins = np.maximum(xmins[selected_idx], xmins[idxs[:-1]])
+        overlapped_ymins = np.maximum(ymins[selected_idx], ymins[idxs[:-1]])
+        overlapped_xmaxs = np.minimum(xmaxs[selected_idx], xmaxs[idxs[:-1]])
+        overlapped_ymaxs = np.minimum(ymaxs[selected_idx], ymaxs[idxs[:-1]])
+
+        w = np.maximum(0, overlapped_xmaxs - overlapped_xmins)
+        h = np.maximum(0, overlapped_ymaxs - overlapped_ymins)
+
+        intersections = w * h
+        unions = areas[idxs[:-1]] + areas[selected_idx] - intersections
+        ious = intersections / unions
+
+        sub_idxs_intersected = np.concatenate(
+            ([len(idxs) - 1], np.where(ious > threshold)[0])
+        )
+
+        union_xmin = xmins[idxs[sub_idxs_intersected]].min()
+        union_ymin = ymins[idxs[sub_idxs_intersected]].min()
+        union_xmax = xmaxs[idxs[sub_idxs_intersected]].max()
+        union_ymax = ymaxs[idxs[sub_idxs_intersected]].max()
+
+        idxs = np.delete(idxs, sub_idxs_intersected)
+
+        union_of_objects.append(
+            Object(
+                max_prob_object.label,
+                max_prob_object.score,
+                [union_xmin, union_ymin, union_xmax, union_ymax],
+            )
+        )
+
+    return union_of_objects
 
 
 def non_max_suppression(objects, threshold):

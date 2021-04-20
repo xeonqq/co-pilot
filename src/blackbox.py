@@ -1,8 +1,9 @@
 from .utils import (
     draw_objects,
 )
-class BlackBox(object):
 
+
+class BlackBox(object):
     def __init__(self, image_saver):
         self._image_saver = image_saver
 
@@ -15,5 +16,3 @@ class BlackBox(object):
 
     def stop_and_join(self):
         self._image_saver.stop_and_join()
-
-

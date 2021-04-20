@@ -37,7 +37,9 @@ class AsyncImageSaver(object):
     def _save_traffic_lights(self, traffic_lights, name_prefix):
         for i, t in enumerate(traffic_lights):
             filename = self._rec_detection_folder.joinpath(
-                    "{0}_{1}_{2:4.2f}-{3}_{4:4.3f}.bmp".format(name_prefix, i, t.obj.score, t.cls, t.score)
+                "{0}_{1}_{2:4.2f}-{3}_{4:4.3f}.bmp".format(
+                    name_prefix, i, t.obj.score, t.cls, t.score
+                )
             )
             t.image.save(filename)
 

@@ -19,12 +19,11 @@ from .utils import (
     non_max_suppression,
     reposition_bounding_box,
     TileConfig,
+    union_of_intersected_objects,
+    Object,
+    TrafficLight,
 )
 from .speaker import Speaker
-
-
-Object = collections.namedtuple("Object", ["label", "score", "bbox"])
-TrafficLight = collections.namedtuple("TrafficLight", ["cls", "score", "obj", "image"])
 
 
 class CoPilot(object):
@@ -162,15 +161,15 @@ class CoPilot(object):
                 bbox = reposition_bounding_box(bbox, tile_location)
 
                 label = self._ssd_labels.get(obj.id, "")
-                objects_by_label.setdefault(label, []).append(
-                    Object(label, obj.score, bbox)
-                )
+                if label == "traffic":  # care about traffic lights for now
+                    objects_by_label.setdefault(label, []).append(
+                        Object(label, obj.score, bbox)
+                    )
 
         self._ssd_infer_time_ms = inference_time * 1000
         logging.debug("ssd infer time %.2f ms" % (self._ssd_infer_time_ms))
 
-        return self._non_max_suppress(objects_by_label)
-        #return objects_by_label
+        return self._union_of_interected_objects(objects_by_label)
 
     def _non_max_suppress(self, objects_by_label):
         nms_objects_by_label = dict()
@@ -179,3 +178,10 @@ class CoPilot(object):
             for idx in idxs:
                 nms_objects_by_label.setdefault(label, []).append(objects[idx])
         return nms_objects_by_label
+
+    def _union_of_interected_objects(self, objects_by_label):
+        union_objects_by_label = dict()
+        for label, objects in objects_by_label.items():
+            objects = union_of_intersected_objects(objects, self._args.iou_threshold)
+            union_objects_by_label[label] = objects
+        return union_objects_by_label

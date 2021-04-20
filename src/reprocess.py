@@ -1,4 +1,5 @@
 import os
+import logging
 import time
 import argparse
 import pathlib
@@ -12,6 +13,7 @@ from .whitebox import WhiteBox
 from .image_saver import AsyncImageSaver
 from .abc import ILed
 
+
 def get_image_gen(args, camera_info):
 
     if args.video:
@@ -21,14 +23,15 @@ def get_image_gen(args, camera_info):
             yield image
 
     if args.images:
-        path_to_test_images  = pathlib.Path(args.images)
+        path_to_test_images = pathlib.Path(args.images)
         image_paths = sorted(list(path_to_test_images.glob("*.jpg")))
         for image_path in image_paths:
-            image = Image.open(image_path, 'r').convert('RGB')
+            image = Image.open(image_path, "r").convert("RGB")
             image.resize(camera_info.resolution)
             yield image
     else:
         assert "must provide --video or --images"
+
 
 def reprocess(args):
 
@@ -40,7 +43,7 @@ def reprocess(args):
 
     for image in get_image_gen(args, camera_info):
         copilot.process(image)
-        #if args.real_time:
+        # if args.real_time:
         #    time.sleep(0.05)
     copilot.stop()
 
@@ -104,11 +107,15 @@ def parse_arguments():
 
     return parser.parse_args()
 
+
 def main():
     args = parse_arguments()
     args.blackbox_path = pathlib.Path(args.blackbox_path).joinpath(
-                time.strftime("%Y%m%d-%H%M%S")
+        time.strftime("%Y%m%d-%H%M%S")
     )
+    args.blackbox_path.mkdir(parents=True, exist_ok=True)
+    log_path = args.blackbox_path.joinpath("co-pilot.log")
+    logging.basicConfig(filename=str(log_path), level=logging.DEBUG)
     reprocess(args)
 
 

@@ -1,5 +1,6 @@
 import queue
 
+
 class PubSub(object):
     def __init__(self):
         self._messages = queue.Queue(1)
@@ -9,4 +10,3 @@ class PubSub(object):
 
     def publish(self, msg):
         self._messages.put(msg)
-
