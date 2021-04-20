@@ -19,7 +19,6 @@ from .utils import (
     non_max_suppression,
     reposition_bounding_box,
     TileConfig,
-    draw_objects,
 )
 from .speaker import Speaker
 
@@ -74,6 +73,9 @@ class CoPilot(object):
         # button = Button(button_pin)
         self._speaker.play("ready")
         logging.info("Starting jounery on {}".format(time.strftime("%Y%m%d-%H%M%S")))
+
+    def stop(self):
+        self._blackbox.stop_and_join()
 
     def run(self):
         prev_cycle_time = time.perf_counter()
@@ -168,6 +170,7 @@ class CoPilot(object):
         logging.debug("ssd infer time %.2f ms" % (self._ssd_infer_time_ms))
 
         return self._non_max_suppress(objects_by_label)
+        #return objects_by_label
 
     def _non_max_suppress(self, objects_by_label):
         nms_objects_by_label = dict()
@@ -176,9 +179,3 @@ class CoPilot(object):
             for idx in idxs:
                 nms_objects_by_label.setdefault(label, []).append(objects[idx])
         return nms_objects_by_label
-
-    def save_cropped_objects(self, object_images, name=""):
-        for obj in object_images:
-            self._image_saver.save_object(obj, name)
-
-        # image.save("detection{}.bmp".format(i))

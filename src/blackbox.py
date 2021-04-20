@@ -13,4 +13,7 @@ class BlackBox(object):
             draw_objects(image, objects_by_label)
             self._image_saver.save_image_and_traffic_lights(image, traffic_lights)
 
+    def stop_and_join(self):
+        self._image_saver.stop_and_join()
+
 

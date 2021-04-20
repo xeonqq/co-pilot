@@ -19,5 +19,8 @@ class WhiteBox(object):
 
         cv2.imshow("display", imcv)
         cv2.waitKey(1)
+
+    def stop_and_join(self):
+        self._image_saver.stop_and_join()
         
 

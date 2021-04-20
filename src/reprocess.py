@@ -12,6 +12,24 @@ from .whitebox import WhiteBox
 from .image_saver import AsyncImageSaver
 from .abc import ILed
 
+def get_image_gen(args, camera_info):
+
+    if args.video:
+        for frame in VideoReader(args.video):
+            image = Image.fromarray(frame)
+            image = image.transpose(method=Image.FLIP_TOP_BOTTOM)
+            yield image
+
+    if args.images:
+        path_to_test_images  = pathlib.Path(args.images)
+        image_paths = sorted(list(path_to_test_images.glob("*.jpg")))
+        for image_path in image_paths:
+            image = Image.open(image_path, 'r').convert('RGB')
+            image.resize(camera_info.resolution)
+            yield image
+    else:
+        assert "must provide --video or --images"
+
 def reprocess(args):
 
     pubsub = PubSub()
@@ -20,12 +38,11 @@ def reprocess(args):
     whitebox = WhiteBox(image_saver)
     copilot = CoPilot(args, pubsub, whitebox, camera_info, ILed())
 
-    for frame in VideoReader(args.video):
-        image = Image.fromarray(frame)
-        image = image.transpose(method=Image.FLIP_TOP_BOTTOM)
+    for image in get_image_gen(args, camera_info):
         copilot.process(image)
         #if args.real_time:
         #    time.sleep(0.05)
+    copilot.stop()
 
 
 def parse_arguments():
@@ -71,8 +88,12 @@ def parse_arguments():
 
     parser.add_argument(
         "--video",
-        required=True,
         help="path to the video to be reprocessed",
+    )
+
+    parser.add_argument(
+        "--images",
+        help="path to the folder of images to be reprocessed",
     )
 
     parser.add_argument(

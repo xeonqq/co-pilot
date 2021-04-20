@@ -19,7 +19,7 @@ class AsyncImageSaver(object):
         self._thread = threading.Thread(target=self._run, daemon=True)
         self._thread.start()
 
-    def join(self):
+    def stop_and_join(self):
         self._task_queue.put(None)
         self._thread.join()
 
@@ -35,9 +35,9 @@ class AsyncImageSaver(object):
         self._task_queue.put(lambda: self._save_traffic_lights(traffic_lights, ti))
 
     def _save_traffic_lights(self, traffic_lights, name_prefix):
-        for t in traffic_lights:
+        for i, t in enumerate(traffic_lights):
             filename = self._rec_detection_folder.joinpath(
-                "{}_{}_{}.bmp".format(name_prefix, t.cls, t.score)
+                    "{0}_{1}_{2:4.2f}-{3}_{4:4.3f}.bmp".format(name_prefix, i, t.obj.score, t.cls, t.score)
             )
             t.image.save(filename)
 
