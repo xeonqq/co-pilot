@@ -19,7 +19,8 @@ def get_image_gen(args, camera_info):
     if args.video:
         for frame in VideoReader(args.video):
             image = Image.fromarray(frame)
-            image = image.transpose(method=Image.FLIP_TOP_BOTTOM)
+            # image = image.transpose(method=Image.FLIP_TOP_BOTTOM)
+            image = image.resize(camera_info.resolution)
             yield image
 
     if args.images:
@@ -27,7 +28,7 @@ def get_image_gen(args, camera_info):
         image_paths = sorted(list(path_to_test_images.glob("*.jpg")))
         for image_path in image_paths:
             image = Image.open(image_path, "r").convert("RGB")
-            image.resize(camera_info.resolution)
+            image = image.resize(camera_info.resolution)
             yield image
     else:
         assert "must provide --video or --images"

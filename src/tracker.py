@@ -1,4 +1,6 @@
 from math import cos, pi
+from scipy.optimize import linear_sum_assignment
+import numpy as np
 
 
 class TrafficLightTrack(object):
@@ -65,21 +67,97 @@ class TrafficLightTrack(object):
         self._update_position()
 
 
+def is_valid_traffic_light(traffic_light):
+    valid_states = {
+        "green",
+        "red",
+        "yellow",
+        "red_yellow",
+        "green_left",
+        "red_left",
+        "green_right",
+        "red_right",
+    }
+    if traffic_light.cls in valid_states:
+        return True
+    else:
+        return False
+
+
+def selected_driving_relevant(detected_traffic_lights, camera_info):
+    traffic_lights = filter(is_valid_traffic_light, detected_traffic_lights)
+
+    current_distance = np.inf
+    selected_traffic_light = None
+    for traffic_light in traffic_lights:
+        distance_to_center = traffic_light.center_pixel_distance(
+            camera_info.pixel_center
+        )
+        if distance_to_center < current_distance:
+            current_distance = distance_to_center
+            selected_traffic_light = traffic_light
+    return selected_traffic_light
+
+
 class Tracker(object):
     def __init__(self, camera_info):
         self._camera_info = camera_info
         self._traffic_light_tracks = []
+        self._relevant_ind = None
 
-    def locate_traffic_light(self, traffic_light):
-        traffic_light_vec = self._camera_info.pixel_to_camera_frame(
-            traffic_light.center
-        )
-        traffic_light_vec = traffic_light_vec / np.linalg.norm(traffic_light_vec)
+    def _match(self, detected_traffic_lights):
+        traffic_lights = list(filter(is_valid_traffic_light, detected_traffic_lights))
 
-    def update(self, traffic_lights):
-        pass
+        if not detected_traffic_lights:  # traffic_light detected, clear track
+            self._traffic_light_tracks = []
+            return
 
-    def _get_driving_relevant_traffic_ligth(self):
-        driving_direction = np.array([0, 0, 1])
-        for light in self._traffic_light_tracks:
-            driving_direction.dot(light.direction)
+        if not self._traffic_light_tracks:
+            self._traffic_light_tracks = traffic_lights
+            return
+
+        rows = len(traffic_lights)  # new detections
+        cols = len(self._traffic_light_tracks)  # existing tracks
+
+        cost = np.zeros((rows, cols))
+        for i, traffic_light in enumerate(traffic_lights):
+            for j, traffic_light_track in enumerate(self._traffic_light_tracks):
+                cost[i, j] = traffic_light.center_pixel_distance(
+                    traffic_light_track.center
+                )
+        row_ind, col_ind = linear_sum_assignment(cost)
+
+        for row, col in zip(row_ind, col_ind):
+            self._traffic_light_tracks[col].update(traffic_lights[row])
+
+        if rows < cols:
+            # remove unmatched track
+            unmatched_inds = set(range(cols)) - set(col_ind)
+            for ind in unmatched_inds:
+                del self._traffic_light_tracks[ind]
+        else:
+            newly_detected_inds = set(range(rows)) - set(row_ind)
+            for ind in newly_detected_inds:
+                self._traffic_light_tracks.append(traffic_light[ind])
+
+    def track(self, detected_traffic_lights):
+        self._match(detected_traffic_lights)
+
+        self._update_driving_relevant_traffic_light_idx()
+
+        print(self._relevant_ind)
+
+    def _update_driving_relevant_traffic_light_idx(self):
+        current_distance = np.inf
+        for i, traffic_light in enumerate(self._traffic_light_tracks):
+            distance_to_center = traffic_light.center_pixel_distance(
+                self._camera_info.pixel_center
+            )
+            if distance_to_center < current_distance:
+                if self._relevant_ind != i:
+                    # new relevant traffic_light updated
+                    self._relevant_ind = i
+                current_distance = distance_to_center
+
+        for i in range(len(self._traffic_light_tracks)):
+            self._traffic_light_tracks[i].set_driving_relevance(i == self._relevant_ind)

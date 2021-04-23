@@ -34,6 +34,7 @@ RUN curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
 RUN apt-get update
 RUN apt-get install -y libedgetpu1-std
 RUN apt-get install -y python3-pycoral
+RUN apt-get install -y python3-tflite-runtime
 
 ADD requirements_docker.txt /tmp/requirements.txt
 RUN python3 -m pip install -r /tmp/requirements.txt

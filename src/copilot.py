@@ -21,9 +21,10 @@ from .utils import (
     TileConfig,
     union_of_intersected_objects,
     Object,
-    TrafficLight,
 )
-from .speaker import Speaker
+from .speaker import Speaker, TrafficLightMachine
+from .tracker import selected_driving_relevant, Tracker
+from .traffic_light import TrafficLight
 
 
 class CoPilot(object):
@@ -36,6 +37,9 @@ class CoPilot(object):
         self._args = args
         self._pubsub = pubsub
         self._blackbox = blackbox
+
+        self._tracker = Tracker(camera_info)
+        self._traffic_light_state = TrafficLightMachine()
 
         # resolution = (1280,960)
         self._ssd_interpreter = make_interpreter(self._args.ssd_model)
@@ -70,7 +74,7 @@ class CoPilot(object):
         self._traffic_light_infer_time_ms = 0
         # button_pin = 8
         # button = Button(button_pin)
-        self._speaker.play("ready")
+        self._speaker.play("visibility_clear")
         logging.info("Starting jounery on {}".format(time.strftime("%Y%m%d-%H%M%S")))
 
     def stop(self):
@@ -99,6 +103,14 @@ class CoPilot(object):
 
         traffic_lights = self.classify_traffic_lights(image, objects_by_label)
 
+        driving_relevant_traffic_light = selected_driving_relevant(
+            traffic_lights, self._camera_info
+        )
+
+        if driving_relevant_traffic_light:
+            sound = self._traffic_light_state.update(driving_relevant_traffic_light.cls)
+            self._speaker.play(sound)
+
         self._blackbox.log(image, traffic_lights, objects_by_label)
 
     def classify_traffic_lights(self, image, objects_by_label):
@@ -108,8 +120,8 @@ class CoPilot(object):
         for obj_image, detection in zip(object_images, detected_traffic_lights):
             c, score = self.classify(obj_image)
             traffic_lights.append(TrafficLight(c, score, detection, obj_image))
-            if c:
-                self._speaker.play(c)
+            # if c:
+            #    self._speaker.play(c)
         return traffic_lights
 
     def classify(self, traffic_light_thumbnail):

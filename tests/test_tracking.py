@@ -1,11 +1,8 @@
 import unittest
 import time
 import pathlib
-import numpy as np
 
 from .context import src
-
-from PIL import Image
 
 from src.copilot import CoPilot
 from src.utils import draw_objects, image_gen
@@ -44,7 +41,7 @@ class TestTrafficLightTracking(unittest.TestCase):
 
         for image in image_gen("tests/test_imgs/tracking", camera_info):
             copilot.process(image)
-
+        copilot.stop()
 
 
 if __name__ == "__main__":
