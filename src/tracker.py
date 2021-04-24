@@ -85,18 +85,18 @@ def is_valid_traffic_light(traffic_light):
 
 
 def selected_driving_relevant(detected_traffic_lights, camera_info):
-    traffic_lights = filter(is_valid_traffic_light, detected_traffic_lights)
+    traffic_lights = list(filter(is_valid_traffic_light, detected_traffic_lights))
 
-    current_distance = np.inf
-    selected_traffic_light = None
+    scores = []
     for traffic_light in traffic_lights:
-        distance_to_center = traffic_light.center_pixel_distance(
-            camera_info.pixel_center
-        )
-        if distance_to_center < current_distance:
-            current_distance = distance_to_center
-            selected_traffic_light = traffic_light
-    return selected_traffic_light
+        d = traffic_light.center_pixel_distance(camera_info.pixel_center)
+        area = traffic_light.area
+        scores.append(area/(2*d))
+    if scores:
+        selected_inx = np.argsort(scores)
+        return traffic_lights[selected_inx[-1]]
+    else:
+        return None
 
 
 class Tracker(object):

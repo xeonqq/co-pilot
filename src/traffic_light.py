@@ -12,24 +12,25 @@ class TrafficLight(object):
         self.obj = obj
         self.image = image
 
-        self._update_center()
+        self._update_property()
 
         self._driving_relevant = False
-        self._callbacks = []
 
-    def on_state_change(cb):
-        self._callbacks.append(cb)
-
-    def _update_center(self):
+    def _update_property(self):
         self._center = np.asarray(
             [
                 (self.obj.bbox[0] + self.obj.bbox[2]) / 2,
                 (self.obj.bbox[1] + self.obj.bbox[3]) / 2,
             ]
         )
+        self._area = self.width*self.height
 
     def set_driving_relevance(self, is_relevant):
         self._driving_relevant = is_relevant
+
+    @property
+    def area(self):
+        return self._area
 
     @property
     def width(self):
@@ -55,7 +56,7 @@ class TrafficLight(object):
         self.score = traffic_light.score
         self.obj = traffic_light.obj
         self.image = traffic_light.image
-        self._update_center()
+        self._update_property()
 
     def __repr__(self):
         return "<TrafficLight {} {}>".format(self.cls, self.obj.bbox)
