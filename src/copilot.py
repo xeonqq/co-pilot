@@ -22,7 +22,8 @@ from .utils import (
     union_of_intersected_objects,
     Object,
 )
-from .speaker import Speaker, TrafficLightMachine
+from .speaker import Speaker
+from .traffic_light_state_adaptor import TrafficLightStateAdaptor
 from .tracker import selected_driving_relevant, Tracker
 from .traffic_light import TrafficLight
 
@@ -39,7 +40,7 @@ class CoPilot(object):
         self._blackbox = blackbox
 
         self._tracker = Tracker(camera_info)
-        self._traffic_light_state = TrafficLightMachine()
+        self._traffic_light_state = TrafficLightStateAdaptor()
 
         # resolution = (1280,960)
         self._ssd_interpreter = make_interpreter(self._args.ssd_model)
@@ -107,9 +108,9 @@ class CoPilot(object):
             traffic_lights, self._camera_info
         )
 
-        if driving_relevant_traffic_light:
-            sound = self._traffic_light_state.update(driving_relevant_traffic_light.cls)
-            self._speaker.play(sound)
+        traffic_light_cls = driving_relevant_traffic_light.cls if driving_relevant_traffic_light else None
+        sound = self._traffic_light_state.update(traffic_light_cls)
+        self._speaker.play(sound)
 
         self._blackbox.log(image, traffic_lights, objects_by_label)
 

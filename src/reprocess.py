@@ -17,9 +17,14 @@ from .abc import ILed
 def get_image_gen(args, camera_info):
 
     if args.video:
-        for frame in VideoReader(args.video):
+        default_fps = 20
+        for i, frame in enumerate(VideoReader(args.video)):
+            if args.fps and i%(default_fps//args.fps) != 0:
+                continue
+
             image = Image.fromarray(frame)
-            # image = image.transpose(method=Image.FLIP_TOP_BOTTOM)
+            if args.flip:
+                image = image.transpose(method=Image.FLIP_TOP_BOTTOM)
             image = image.resize(camera_info.resolution)
             yield image
 
@@ -91,6 +96,13 @@ def parse_arguments():
     )
 
     parser.add_argument(
+        "--fps",
+        help=("frame rate to play the video"),
+        type=int,
+        default=None,
+    )
+
+    parser.add_argument(
         "--video",
         help="path to the video to be reprocessed",
     )
@@ -100,6 +112,11 @@ def parse_arguments():
         help="path to the folder of images to be reprocessed",
     )
 
+    parser.add_argument(
+        "--flip",
+        action="store_true",
+        help="flip top bottom of the video",
+    )
     parser.add_argument(
         "--real_time",
         action="store_true",

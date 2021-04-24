@@ -1,5 +1,5 @@
 from .utils import (
-    draw_objects,
+    draw_objects_and_traffic_lights
 )
 import cv2
 import numpy as np
@@ -12,7 +12,7 @@ class WhiteBox(object):
     def log(self, image, traffic_lights, objects_by_label):
         # save image with detection overlay,
         # as well as cropped detection and classification result
-        draw_objects(image, objects_by_label)
+        draw_objects_and_traffic_lights(image, objects_by_label, traffic_lights)
         if traffic_lights:
             self._image_saver.save_image_and_traffic_lights(image, traffic_lights)
         imcv = cv2.cvtColor(np.asarray(image), cv2.COLOR_RGB2BGR)

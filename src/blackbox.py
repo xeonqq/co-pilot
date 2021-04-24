@@ -1,5 +1,5 @@
 from .utils import (
-    draw_objects,
+    draw_objects_and_traffic_lights
 )
 
 
@@ -11,7 +11,7 @@ class BlackBox(object):
         # save image with detection overlay,
         # as well as cropped detection and classification result
         if traffic_lights:
-            draw_objects(image, objects_by_label)
+            draw_objects_and_traffic_lights(image, objects_by_label, traffic_lights)
             self._image_saver.save_image_and_traffic_lights(image, traffic_lights)
 
     def stop_and_join(self):

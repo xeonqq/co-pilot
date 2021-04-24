@@ -1,5 +1,5 @@
 from math import cos, pi
-from scipy.optimize import linear_sum_assignment
+#from scipy.optimize import linear_sum_assignment
 import numpy as np
 
 

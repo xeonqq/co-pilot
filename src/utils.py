@@ -9,6 +9,15 @@ TileConfig = collections.namedtuple(
 )
 Object = collections.namedtuple("Object", ["label", "score", "bbox"])
 
+RED_STATES = {"red", "red_left", "red_right"}
+GREEN_STATES = {"green", "green_left", "green_right"}
+
+
+def is_red(state):
+    return state in RED_STATES
+
+def is_green(state):
+    return state in GREEN_STATES
 
 def tiles_location_gen(img_size, tile_config):
     """Generates location of tiles after splitting the given image according the tile_size and overlap.
@@ -160,6 +169,41 @@ def draw_objects(image, objects_by_label):
         for obj in objects:
             draw_object(draw, obj)
 
+def _get_traffic_light_drawing_color(traffic_light):
+    color_map ={"green": "#00ff00",
+                "red": "#ff0000",
+                "yellow": "#FFFF00",
+                "red_yellow": "#FFA500",
+                "green_left": "#008000",
+                "red_left": "#CD5C5C",
+                "green_right": "#006400",
+                "red_right": "#8B0000",
+                }
+    return color_map.get(traffic_light.cls, "white")
+
+def draw_traffic_light(draw, traffic_light):
+    """Draws detection candidate on the image.
+
+    Args:
+      draw: the PIL.ImageDraw object that draw on the image.
+      traffic_light: traffic light with classification
+    """
+    if not traffic_light.cls:
+        return
+    color = _get_traffic_light_drawing_color(traffic_light)
+    draw.rectangle(traffic_light.obj.bbox, outline=color)
+    draw.text((traffic_light.obj.bbox[0], traffic_light.obj.bbox[3]+15), traffic_light.cls, fill=color)
+    draw.text((traffic_light.obj.bbox[0], traffic_light.obj.bbox[3] + 25), str(traffic_light.score), fill=color)
+
+
+def draw_traffic_lights(image, traffic_lights):
+    draw = ImageDraw.Draw(image)
+    for traffic_light in traffic_lights:
+        draw_traffic_light(draw, traffic_light)
+
+def draw_objects_and_traffic_lights(image, objects_by_label, traffic_lights):
+    draw_objects(image, objects_by_label)
+    draw_traffic_lights(image, traffic_lights)
 
 def reposition_bounding_box(bbox, tile_location):
     """Relocates bbox to the relative location to the original image.
