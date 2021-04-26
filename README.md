@@ -1,12 +1,18 @@
+![](images/traffic_light_detction_seq.gif)
+
+<h2 align="center">Co-Pilot</h2>
+
+Traffic light alert and Dashcam all in one. 
+`Co-Pilot` = Raspberrypi 3/4 + rpi camera + Google Coral TPU.
+
 ## Dependencies
 ```bash
-# for sound support
-python3 -m pip install -U pygame --user
+python3 -m pip install -r requirements.txt
 sudo apt-get install libsdl2-mixer-2.0-0  libsdl2-2.0-0
 ```
 ## Run Co-Pilot
 ```bash
-python3 -m src.main  --ssd_model models/ssd_mobilenet_v2_coco_quant_no_nms_edgetpu.tflite  --label models/coco_labels.txt --score_threshold 0.4 --traffic_light_classification_model models/traffic_light_edgetpu.tflite  --traffic_light_label models/traffic_light_labels.txt --blackbox_path=./
+python3 -m src.main  --ssd_model models/ssd_mobilenet_v2_coco_quant_no_nms_edgetpu.tflite  --label models/coco_labels.txt --score_threshold 0.3 --traffic_light_classification_model models/traffic_light_edgetpu.tflite  --traffic_light_label models/traffic_light_labels.txt --blackbox_path=./
 ```
 
 ## Test
@@ -29,7 +35,7 @@ Build and run docker container
 In docker container
 ```bash
 cd workspace
-python3 -m src.reprocess  --ssd_model models/ssd_mobilenet_v2_coco_quant_no_nms_edgetpu.tflite  --label models/coco_labels.txt --score_threshold 0.4 --traffic_light_classification_model models/traffic_light_edgetpu.tflite  --traffic_light_label models/traffic_light_labels.txt --blackbox_path=./ --video recording_20210417-090028.h264.mp4 --real_time
+python3 -m src.reprocess  --ssd_model models/ssd_mobilenet_v2_coco_quant_no_nms_edgetpu.tflite  --label models/coco_labels.txt --score_threshold 0.3 --traffic_light_classification_model models/traffic_light_edgetpu.tflite  --traffic_light_label models/traffic_light_labels.txt --blackbox_path=./ --video recording_20210417-090028.h264.mp4 --fps 5
 ```
 
 ## References
