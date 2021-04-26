@@ -179,7 +179,7 @@ def _get_traffic_light_drawing_color(traffic_light):
                 "green_right": "#006400",
                 "red_right": "#8B0000",
                 }
-    return color_map.get(traffic_light.cls, "white")
+    return color_map.get(traffic_light.cls, "blue")
 
 def draw_traffic_light(draw, traffic_light):
     """Draws detection candidate on the image.
@@ -192,8 +192,8 @@ def draw_traffic_light(draw, traffic_light):
         return
     color = _get_traffic_light_drawing_color(traffic_light)
     draw.rectangle(traffic_light.obj.bbox, outline=color)
-    draw.text((traffic_light.obj.bbox[0], traffic_light.obj.bbox[3]+15), traffic_light.cls, fill=color)
-    draw.text((traffic_light.obj.bbox[0], traffic_light.obj.bbox[3] + 25), str(traffic_light.score), fill=color)
+    draw.text((traffic_light.obj.bbox[0], traffic_light.obj.bbox[3]), traffic_light.cls, fill=color)
+    draw.text((traffic_light.obj.bbox[0], traffic_light.obj.bbox[3] + 10), str(traffic_light.score), fill=color)
 
 
 def draw_traffic_lights(image, traffic_lights):
@@ -202,7 +202,7 @@ def draw_traffic_lights(image, traffic_lights):
         draw_traffic_light(draw, traffic_light)
 
 def draw_objects_and_traffic_lights(image, objects_by_label, traffic_lights):
-    draw_objects(image, objects_by_label)
+    # draw_objects(image, objects_by_label)
     draw_traffic_lights(image, traffic_lights)
 
 def reposition_bounding_box(bbox, tile_location):
