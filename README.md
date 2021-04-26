@@ -1,4 +1,4 @@
-![](images/traffic_light_detction_seq.gif)
+![](images/traffic_light_detection_seq.gif)
 
 <h2 align="center">Co-Pilot</h2>
 
