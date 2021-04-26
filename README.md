@@ -1,9 +1,12 @@
-![](images/traffic_light_detection_seq.gif)
+
 
 <h2 align="center">Co-Pilot</h2>
 
-Traffic light alert and Dashcam all in one. 
+Traffic light alert and Dashcam all in one.
+
 `Co-Pilot` = Raspberrypi 3/4 + rpi camera + Google Coral TPU.
+
+![](images/traffic_light_detection_seq.gif)
 
 ## Dependencies
 ```bash
