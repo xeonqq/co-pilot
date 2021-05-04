@@ -109,10 +109,13 @@ class CoPilot(object):
         )
 
         traffic_light_cls = driving_relevant_traffic_light.cls if driving_relevant_traffic_light else None
+
+        tracks = self._tracker.track(traffic_lights)
+
         sound = self._traffic_light_state.update(traffic_light_cls)
         self._speaker.play(sound)
 
-        self._blackbox.log(image, traffic_lights, objects_by_label)
+        self._blackbox.log(image, traffic_lights, objects_by_label, tracks)
 
     def classify_traffic_lights(self, image, objects_by_label):
         detected_traffic_lights = objects_by_label.get("traffic", [])

@@ -195,6 +195,20 @@ def draw_traffic_light(draw, traffic_light):
     draw.text((traffic_light.obj.bbox[0], traffic_light.obj.bbox[3]), traffic_light.cls, fill=color)
     draw.text((traffic_light.obj.bbox[0], traffic_light.obj.bbox[3] + 10), str(traffic_light.score), fill=color)
 
+def draw_traffic_light_track(draw, traffic_light_track):
+    """Draws detection candidate on the image.
+
+    Args:
+      draw: the PIL.ImageDraw object that draw on the image.
+      traffic_light: traffic light with classification
+    """
+    if not traffic_light_track.cls:
+        return
+    color = _get_traffic_light_drawing_color(traffic_light_track)
+    draw.rectangle(traffic_light_track.obj.bbox, outline=color)
+    draw.text((traffic_light_track.obj.bbox[0], traffic_light_track.obj.bbox[3]), traffic_light_track.cls, fill=color)
+    draw.text((traffic_light_track.obj.bbox[0], traffic_light_track.obj.bbox[3] + 10), str(traffic_light_track.id), fill=color)
+
 
 def draw_traffic_lights(image, traffic_lights):
     draw = ImageDraw.Draw(image)
@@ -204,6 +218,12 @@ def draw_traffic_lights(image, traffic_lights):
 def draw_objects_and_traffic_lights(image, objects_by_label, traffic_lights):
     # draw_objects(image, objects_by_label)
     draw_traffic_lights(image, traffic_lights)
+
+
+def draw_traffic_light_tracks(image, traffic_light_tracks):
+    draw = ImageDraw.Draw(image)
+    for track in traffic_light_tracks:
+        draw_traffic_light_track(draw, track)
 
 def reposition_bounding_box(bbox, tile_location):
     """Relocates bbox to the relative location to the original image.

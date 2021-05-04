@@ -1,15 +1,35 @@
-from math import cos, pi
-#from scipy.optimize import linear_sum_assignment
+from math import cos, pi, atan
+from scipy.optimize import linear_sum_assignment
 import numpy as np
+from .traffic_light import TrafficLight
+
+PlausibleTrafficLightTransitionMap = {
+    "green": {"yellow","red", "red_left","red_right"},
+    "green_left": {"yellow","red", "red_left","red_right"},
+    "green_right": {"yellow","red", "red_left","red_right"},
+    "red": {"red_yellow", "green","green_left", "green_right"},
+    "red_left": {"red_yellow", "green","green_left", "green_right"},
+    "red_right": {"red_yellow", "green","green_left", "green_right"},
+    "yellow": {"red", "red_left", "red_right"},
+    "red_yellow": {"green","green_left", "green_right"}
+}
+
+LaneWidth = 3
 
 
 class TrafficLightTrack(object):
-    LaneWidth = 3
-
+    TrackID=0
     def __init__(self, camera_info, traffic_light):
+        TrafficLightTrack.TrackID += 1
+        self._track_id = TrafficLightTrack.TrackID
+
         self._traffic_light = traffic_light
         self._camera_info = camera_info
-        self._update_position()
+        #self._update_position()
+        self._feed()
+        self._cls= traffic_light.cls
+        self._prev_traffic_light = traffic_light
+
 
     def _update_position(self):
         # position for now is just a unit vector pointing from camera to center of traffic light
@@ -29,6 +49,10 @@ class TrafficLightTrack(object):
             scale = TrafficLight.WORLD_WIDTH / self._traffic_light.width
 
         self._pos_approx_cam_frame = traffic_light_camera_frame * scale
+
+    @property
+    def id(self):
+        return self._track_id
 
     @property
     def position_approx(self):
@@ -63,8 +87,44 @@ class TrafficLightTrack(object):
         return True
 
     def update(self, traffic_light):
+        self._feed()
+        self._update_state(traffic_light)
+
+    def _update_state(self, traffic_light):
+        if traffic_light.cls in PlausibleTrafficLightTransitionMap[self._cls]: # update when it is a plausible transition
+            self._cls = self._traffic_light.cls
+        elif traffic_light.cls == self._prev_traffic_light.cls: # update when two consequtive same classification
+            self._cls = traffic_light.cls
+
+        self._prev_traffic_light = self._traffic_light
         self._traffic_light = traffic_light
-        self._update_position()
+
+    @property
+    def score(self):
+        return self._traffic_light.score
+
+    @property
+    def obj(self):
+        return self._traffic_light.obj
+
+    @property
+    def center(self):
+        return self._traffic_light.center
+
+    @property
+    def cls(self):
+        return self._cls
+
+    @property
+    def alive(self):
+        return self._energy > 0
+
+    def decay(self):
+        self._energy -= 1
+
+    def _feed(self):
+        #TODO: should be adaptive with frame rate
+        self._energy = 3
 
 
 def is_valid_traffic_light(traffic_light):
@@ -103,19 +163,8 @@ class Tracker(object):
     def __init__(self, camera_info):
         self._camera_info = camera_info
         self._traffic_light_tracks = []
-        self._relevant_ind = None
 
-    def _match(self, detected_traffic_lights):
-        traffic_lights = list(filter(is_valid_traffic_light, detected_traffic_lights))
-
-        if not detected_traffic_lights:  # traffic_light detected, clear track
-            self._traffic_light_tracks = []
-            return
-
-        if not self._traffic_light_tracks:
-            self._traffic_light_tracks = traffic_lights
-            return
-
+    def _match(self, traffic_lights):
         rows = len(traffic_lights)  # new detections
         cols = len(self._traffic_light_tracks)  # existing tracks
 
@@ -125,39 +174,36 @@ class Tracker(object):
                 cost[i, j] = traffic_light.center_pixel_distance(
                     traffic_light_track.center
                 )
+        print("cost, ", cost)
         row_ind, col_ind = linear_sum_assignment(cost)
-
-        for row, col in zip(row_ind, col_ind):
-            self._traffic_light_tracks[col].update(traffic_lights[row])
-
-        if rows < cols:
-            # remove unmatched track
-            unmatched_inds = set(range(cols)) - set(col_ind)
-            for ind in unmatched_inds:
-                del self._traffic_light_tracks[ind]
-        else:
-            newly_detected_inds = set(range(rows)) - set(row_ind)
-            for ind in newly_detected_inds:
-                self._traffic_light_tracks.append(traffic_light[ind])
+        return row_ind, col_ind
 
     def track(self, detected_traffic_lights):
-        self._match(detected_traffic_lights)
 
-        self._update_driving_relevant_traffic_light_idx()
+        traffic_lights = list(filter(is_valid_traffic_light, detected_traffic_lights))
+        if not self._traffic_light_tracks:
+            self._traffic_light_tracks = [TrafficLightTrack(self._camera_info, traffic_light) for traffic_light in traffic_lights]
+            print("init: ", self._traffic_light_tracks)
+        else:
+            detected_traffic_lights_ind, traffic_light_tracks_ind = self._match(traffic_lights)
 
-        print(self._relevant_ind)
+            print("track: ", detected_traffic_lights_ind, traffic_light_tracks_ind)
+            # update matched existing tracks
+            for detected_traffic_light_ind, traffic_light_track_ind in zip(detected_traffic_lights_ind, traffic_light_tracks_ind):
+                self._traffic_light_tracks[traffic_light_track_ind].update(traffic_lights[detected_traffic_light_ind])
 
-    def _update_driving_relevant_traffic_light_idx(self):
-        current_distance = np.inf
-        for i, traffic_light in enumerate(self._traffic_light_tracks):
-            distance_to_center = traffic_light.center_pixel_distance(
-                self._camera_info.pixel_center
-            )
-            if distance_to_center < current_distance:
-                if self._relevant_ind != i:
-                    # new relevant traffic_light updated
-                    self._relevant_ind = i
-                current_distance = distance_to_center
+            # add new tracks
+            n_detected_traffic_lights = len(traffic_lights)
+            newly_detected_inds = set(range(n_detected_traffic_lights)) - set(traffic_light_tracks_ind)
+            print ("new:", newly_detected_inds)
+            for ind in newly_detected_inds:
+                self._traffic_light_tracks.append(TrafficLightTrack(self._camera_info,traffic_lights[ind]))
 
-        for i in range(len(self._traffic_light_tracks)):
-            self._traffic_light_tracks[i].set_driving_relevance(i == self._relevant_ind)
+        self._prune_tracks()
+        return self._traffic_light_tracks
+
+    def _prune_tracks(self):
+        for tl_track in self._traffic_light_tracks:
+            tl_track.decay()
+        self._traffic_light_tracks[:] = [track for track in self._traffic_light_tracks if track.alive]
+

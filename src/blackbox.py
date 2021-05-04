@@ -7,7 +7,8 @@ class BlackBox(object):
     def __init__(self, image_saver):
         self._image_saver = image_saver
 
-    def log(self, image, traffic_lights, objects_by_label):
+    def log(self, image, traffic_lights, objects_by_label, traffic_light_tracks):
+
         # save image with detection overlay,
         # as well as cropped detection and classification result
         if traffic_lights:
