@@ -108,7 +108,11 @@ class CoPilot(object):
             traffic_lights, self._camera_info
         )
 
-        traffic_light_cls = driving_relevant_traffic_light.cls if driving_relevant_traffic_light else None
+        traffic_light_cls = (
+            driving_relevant_traffic_light.cls
+            if driving_relevant_traffic_light
+            else None
+        )
 
         tracks = self._tracker.track(traffic_lights)
 

@@ -16,8 +16,10 @@ GREEN_STATES = {"green", "green_left", "green_right"}
 def is_red(state):
     return state in RED_STATES
 
+
 def is_green(state):
     return state in GREEN_STATES
+
 
 def tiles_location_gen(img_size, tile_config):
     """Generates location of tiles after splitting the given image according the tile_size and overlap.
@@ -47,6 +49,38 @@ def tiles_location_gen(img_size, tile_config):
             xmax = min(img_width, w + tile_config.tile_size)
             ymax = min(img_height, h + tile_config.tile_size)
             yield [xmin, ymin, xmax, ymax]
+
+
+def intersection_of_union(query_bbox, bboxes):
+    xmins = bboxes[:, 0]
+    ymins = bboxes[:, 1]
+    xmaxs = bboxes[:, 2]
+    ymaxs = bboxes[:, 3]
+    xmin, ymin, xmax, ymax = query_bbox[0], query_bbox[1], query_bbox[2], query_bbox[3]
+    overlapped_xmins = np.maximum(xmin, xmins)
+    overlapped_ymins = np.maximum(ymin, ymins)
+    overlapped_xmaxs = np.minimum(xmax, xmaxs)
+    overlapped_ymaxs = np.minimum(ymax, ymaxs)
+
+    w = np.maximum(0, overlapped_xmaxs - overlapped_xmins)
+    h = np.maximum(0, overlapped_ymaxs - overlapped_ymins)
+
+    intersections = w * h
+    areas = (xmaxs - xmins) * (ymaxs - ymins)
+    query_area = (xmax - xmin) * (ymax - ymin)
+    unions = areas + query_area - intersections
+    ious = intersections / unions
+    return ious
+
+
+def magnify_bbox(traffic_light, scale):
+    half_width = traffic_light.width * scale / 2.0
+    half_height = traffic_light.height * scale / 2.0
+    xmin = traffic_light.center[0] - half_width
+    xmax = traffic_light.center[0] + half_width
+    ymin = traffic_light.center[1] - half_height
+    ymax = traffic_light.center[1] + half_height
+    return [xmin, ymin, xmax, ymax]
 
 
 def union_of_intersected_objects(objects, threshold):
@@ -169,17 +203,20 @@ def draw_objects(image, objects_by_label):
         for obj in objects:
             draw_object(draw, obj)
 
+
 def _get_traffic_light_drawing_color(traffic_light):
-    color_map ={"green": "#00ff00",
-                "red": "#ff0000",
-                "yellow": "#FFFF00",
-                "red_yellow": "#FFA500",
-                "green_left": "#008000",
-                "red_left": "#CD5C5C",
-                "green_right": "#006400",
-                "red_right": "#8B0000",
-                }
+    color_map = {
+        "green": "#00ff00",
+        "red": "#ff0000",
+        "yellow": "#FFFF00",
+        "red_yellow": "#FFA500",
+        "green_left": "#008000",
+        "red_left": "#CD5C5C",
+        "green_right": "#006400",
+        "red_right": "#8B0000",
+    }
     return color_map.get(traffic_light.cls, "blue")
+
 
 def draw_traffic_light(draw, traffic_light):
     """Draws detection candidate on the image.
@@ -192,8 +229,17 @@ def draw_traffic_light(draw, traffic_light):
         return
     color = _get_traffic_light_drawing_color(traffic_light)
     draw.rectangle(traffic_light.obj.bbox, outline=color)
-    draw.text((traffic_light.obj.bbox[0], traffic_light.obj.bbox[3]), traffic_light.cls, fill=color)
-    draw.text((traffic_light.obj.bbox[0], traffic_light.obj.bbox[3] + 10), str(traffic_light.score), fill=color)
+    draw.text(
+        (traffic_light.obj.bbox[0], traffic_light.obj.bbox[3]),
+        traffic_light.cls,
+        fill=color,
+    )
+    draw.text(
+        (traffic_light.obj.bbox[0], traffic_light.obj.bbox[3] + 10),
+        str(traffic_light.score),
+        fill=color,
+    )
+
 
 def draw_traffic_light_track(draw, traffic_light_track):
     """Draws detection candidate on the image.
@@ -205,15 +251,24 @@ def draw_traffic_light_track(draw, traffic_light_track):
     if not traffic_light_track.cls:
         return
     color = _get_traffic_light_drawing_color(traffic_light_track)
-    draw.rectangle(traffic_light_track.obj.bbox, outline=color)
-    draw.text((traffic_light_track.obj.bbox[0], traffic_light_track.obj.bbox[3]), traffic_light_track.cls, fill=color)
-    draw.text((traffic_light_track.obj.bbox[0], traffic_light_track.obj.bbox[3] + 10), str(traffic_light_track.id), fill=color)
+    draw.rectangle(traffic_light_track.bbox, outline=color)
+    draw.text(
+        (traffic_light_track.bbox[0], traffic_light_track.bbox[3]),
+        traffic_light_track.cls,
+        fill=color,
+    )
+    draw.text(
+        (traffic_light_track.bbox[0], traffic_light_track.bbox[3] + 10),
+        str(traffic_light_track.id),
+        fill=color,
+    )
 
 
 def draw_traffic_lights(image, traffic_lights):
     draw = ImageDraw.Draw(image)
     for traffic_light in traffic_lights:
         draw_traffic_light(draw, traffic_light)
+
 
 def draw_objects_and_traffic_lights(image, objects_by_label, traffic_lights):
     # draw_objects(image, objects_by_label)
@@ -224,6 +279,7 @@ def draw_traffic_light_tracks(image, traffic_light_tracks):
     draw = ImageDraw.Draw(image)
     for track in traffic_light_tracks:
         draw_traffic_light_track(draw, track)
+
 
 def reposition_bounding_box(bbox, tile_location):
     """Relocates bbox to the relative location to the original image.

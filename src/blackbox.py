@@ -1,6 +1,4 @@
-from .utils import (
-    draw_objects_and_traffic_lights
-)
+from .utils import draw_objects_and_traffic_lights
 
 
 class BlackBox(object):

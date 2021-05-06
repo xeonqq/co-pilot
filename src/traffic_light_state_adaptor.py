@@ -1,6 +1,7 @@
 import time
 from .utils import is_green, is_red
 
+
 class TrafficLightStateAdaptor(object):
     def __init__(self):
         self._prev_state = None
@@ -20,7 +21,7 @@ class TrafficLightStateAdaptor(object):
 
     def update(self, state):
         sound_track = None
-        if not state: # no detected valid traffic light
+        if not state:  # no detected valid traffic light
             if self._time_interval_since_last_update() > 3:
                 self._prev_state = None
             return sound_track

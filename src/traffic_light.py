@@ -23,7 +23,7 @@ class TrafficLight(object):
                 (self.obj.bbox[1] + self.obj.bbox[3]) / 2,
             ]
         )
-        self._area = self.width*self.height
+        self._area = self.width * self.height
 
     def set_driving_relevance(self, is_relevant):
         self._driving_relevant = is_relevant

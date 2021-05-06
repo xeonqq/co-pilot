@@ -1,7 +1,4 @@
-from .utils import (
-    draw_objects_and_traffic_lights,
-    draw_traffic_light_tracks
-)
+from .utils import draw_objects_and_traffic_lights, draw_traffic_light_tracks
 import cv2
 import numpy as np
 

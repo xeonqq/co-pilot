@@ -19,7 +19,7 @@ def get_image_gen(args, camera_info):
     if args.video:
         default_fps = 20
         for i, frame in enumerate(VideoReader(args.video)):
-            if args.fps and i%(default_fps//args.fps) != 0:
+            if args.fps and i % (default_fps // args.fps) != 0:
                 continue
 
             image = Image.fromarray(frame)
