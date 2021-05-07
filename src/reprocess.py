@@ -44,7 +44,7 @@ def reprocess(args):
     pubsub = PubSub()
     camera_info = CameraInfo("config/intrinsics.yml")
     image_saver = AsyncImageSaver(args.blackbox_path)
-    whitebox = WhiteBox(image_saver)
+    whitebox = WhiteBox(image_saver, args.step)
     copilot = CoPilot(args, pubsub, whitebox, camera_info, ILed())
 
     for image in get_image_gen(args, camera_info):
@@ -122,7 +122,11 @@ def parse_arguments():
         action="store_true",
         help="use real time reprocessing",
     )
-
+    parser.add_argument(
+        "--step",
+        action="store_true",
+        help="only step the frame when any key press",
+    )
     return parser.parse_args()
 
 

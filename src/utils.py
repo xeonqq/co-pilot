@@ -275,10 +275,14 @@ def draw_objects_and_traffic_lights(image, objects_by_label, traffic_lights):
     draw_traffic_lights(image, traffic_lights)
 
 
-def draw_traffic_light_tracks(image, traffic_light_tracks):
+def draw_traffic_light_tracks(image, tracker):
     draw = ImageDraw.Draw(image)
-    for track in traffic_light_tracks:
+    for track in tracker.tracks:
         draw_traffic_light_track(draw, track)
+    driving_relevant = tracker.get_driving_relevant_track()
+    if driving_relevant:
+        xmin, ymin, xmax, ymax = driving_relevant.bbox
+        draw.rectangle([xmin - 1, ymin - 1, xmax + 1, ymax + 1], outline="#00FBFF")
 
 
 def reposition_bounding_box(bbox, tile_location):

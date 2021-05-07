@@ -31,7 +31,9 @@ class TrafficLightTrack(object):
         self._bbox = traffic_light.obj.bbox
         self._camera_info = camera_info
         # self._update_position()
-        self._feed()
+        self._energy_upper_bound = 3
+        self._energy = self._energy_upper_bound
+        self._vote = 0
         self._cls = traffic_light.cls
         self._prev_traffic_light = traffic_light
         self._setup_kf(dt=0.5)
@@ -120,15 +122,15 @@ class TrafficLightTrack(object):
         self._bbox = [xmin, ymin, xmax, ymax]
 
     def predict_bbox(self):
-        print("Before pred ", self._track_id, self._kf.x, self._traffic_light.center)
+        # print("Before pred ", self._track_id, self._kf.x, self._traffic_light.center)
         self._kf.predict()
-        print("Predicted ", self._track_id, self._kf.x)
+        # print("Predicted ", self._track_id, self._kf.x)
         self._update_bbox(self._kf.x[:2])
         return self._bbox
 
     def update(self, traffic_light):
         self._kf.update(traffic_light.center)
-        print("After update ", self._track_id, self._kf.x, traffic_light.center)
+        # print("After update ", self._track_id, self._kf.x, traffic_light.center)
         self._update_bbox(self._kf.x[:2])
 
         self._update_state(traffic_light)
@@ -143,7 +145,7 @@ class TrafficLightTrack(object):
             traffic_light.cls == self._prev_traffic_light.cls
         ):  # update when two consequtive same classification
             self._cls = traffic_light.cls
-        print(traffic_light.cls, self._cls)
+        # print(traffic_light.cls, self._cls)
 
         self._prev_traffic_light = self._traffic_light
         self._traffic_light = traffic_light
@@ -162,7 +164,21 @@ class TrafficLightTrack(object):
 
     @property
     def center(self):
-        return self._traffic_light.center
+        return np.asarray(
+            [(self._bbox[0] + self._bbox[2]) / 2, (self._bbox[1] + self._bbox[3]) / 2]
+        )
+
+    @property
+    def width(self):
+        return self.bbox[2] - self.bbox[0]
+
+    @property
+    def height(self):
+        return self.bbox[3] - self.bbox[1]
+
+    @property
+    def area(self):
+        return self.width * self.height
 
     @property
     def cls(self):
@@ -177,10 +193,22 @@ class TrafficLightTrack(object):
 
     def _feed(self):
         # TODO: should be adaptive with frame rate
-        self._energy = 3
+        self._energy = self._energy_upper_bound
+
+    def add_vote(self):
+        self._vote += 1
+        if (
+            self._vote % 10 == 0
+        ):  # delay the prune to prevent detection of other tracks during crossing
+            self._energy_upper_bound = min(self._energy_upper_bound + 1, 10)
+
+    def get_vote(self):
+        return self._vote
 
     def __repr__(self):
-        return "<TrafficLightTrack {}: {} {}>".format(self.id, self.cls, self._energy)
+        return "<TrafficLightTrack {}: {} energy {} vote {}>".format(
+            self.id, self.cls, self._energy, self._vote
+        )
 
 
 def is_valid_traffic_light(traffic_light):
@@ -219,6 +247,7 @@ class Tracker(object):
     def __init__(self, camera_info):
         self._camera_info = camera_info
         self._traffic_light_tracks = []
+        self._driving_relevant_track = None
 
     def _match(self, traffic_lights):
         rows = len(traffic_lights)  # new detections
@@ -233,11 +262,6 @@ class Tracker(object):
             ious = intersection_of_union(magnify_bbox(traffic_light, 3), bboxes)
             weight[i, :] = ious
 
-        # for i, traffic_light in enumerate(traffic_lights):
-        #     for j, traffic_light_track in enumerate(self._traffic_light_tracks):
-        #         cost[i, j] = traffic_light.center_pixel_distance(
-        #             traffic_light_track.center
-        #         )
         row_ind, col_ind = linear_sum_assignment(weight, maximize=True)
         matched_detected_traffic_lights_ind = []
         matched_traffic_light_tracks_ind = []
@@ -245,26 +269,26 @@ class Tracker(object):
             if weight[r, c] > 0:
                 matched_detected_traffic_lights_ind.append(r)
                 matched_traffic_light_tracks_ind.append(c)
-        print(
-            "cost {}, match: {}:{}".format(
-                weight,
-                matched_detected_traffic_lights_ind,
-                matched_traffic_light_tracks_ind,
-            )
-        )
+        # print(
+        #     "cost {}, match: {}:{}".format(
+        #         weight,
+        #         matched_detected_traffic_lights_ind,
+        #         matched_traffic_light_tracks_ind,
+        #     )
+        # )
         return matched_detected_traffic_lights_ind, matched_traffic_light_tracks_ind
 
     def track(self, detected_traffic_lights):
-        print("----------------------")
+        # print("----------------------")
         traffic_lights = list(filter(is_valid_traffic_light, detected_traffic_lights))
-        print("detected: ", traffic_lights)
-        print("existing tracks: ", self._traffic_light_tracks)
+        # print("detected: ", traffic_lights)
+        # print("existing tracks: ", self._traffic_light_tracks)
         if not self._traffic_light_tracks:
             self._traffic_light_tracks = [
                 TrafficLightTrack(self._camera_info, traffic_light)
                 for traffic_light in traffic_lights
             ]
-            print("init: ", self._traffic_light_tracks)
+            # print("init: ", self._traffic_light_tracks)
         else:
             (
                 matched_detected_traffic_lights_ind,
@@ -284,15 +308,16 @@ class Tracker(object):
             newly_detected_inds = set(range(n_detected_traffic_lights)) - set(
                 matched_detected_traffic_lights_ind
             )
-            print("new:", newly_detected_inds)
+            # print("new:", newly_detected_inds)
             for ind in newly_detected_inds:
                 self._traffic_light_tracks.append(
                     TrafficLightTrack(self._camera_info, traffic_lights[ind])
                 )
 
         self._prune_tracks()
-
-        print("end tracks: ", self._traffic_light_tracks)
+        self._vote_for_driving_relevant()
+        self._driving_relevant_track = self._select_driving_relevant_track()
+        # print("end tracks: ", self._traffic_light_tracks)
         return self._traffic_light_tracks
 
     def _prune_tracks(self):
@@ -301,3 +326,29 @@ class Tracker(object):
         self._traffic_light_tracks[:] = [
             track for track in self._traffic_light_tracks if track.alive
         ]
+
+    def _vote_for_driving_relevant(self):
+        scores = []
+        view_center = np.array(
+            [self._camera_info.pixel_center[0], self._camera_info.pixel_center[1] * 0.6]
+        )
+        for track in self._traffic_light_tracks:
+            d = np.linalg.norm(track.center - view_center)
+            scores.append(track.area / (2 * d))
+        if scores:
+            selected_inx = np.argmax(scores)
+            self._traffic_light_tracks[selected_inx].add_vote()
+
+    @property
+    def tracks(self):
+        return self._traffic_light_tracks
+
+    def _select_driving_relevant_track(self):
+        if self._traffic_light_tracks:
+            f = lambda i: self._traffic_light_tracks[i].get_vote()
+            ind = max(range(len(self._traffic_light_tracks)), key=f)
+            return self._traffic_light_tracks[ind]
+        return None
+
+    def get_driving_relevant_track(self):
+        return self._driving_relevant_track

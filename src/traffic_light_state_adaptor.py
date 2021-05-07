@@ -22,7 +22,7 @@ class TrafficLightStateAdaptor(object):
     def update(self, state):
         sound_track = None
         if not state:  # no detected valid traffic light
-            if self._time_interval_since_last_update() > 3:
+            if self._time_interval_since_last_update() > 1.5:
                 self._prev_state = None
             return sound_track
 
