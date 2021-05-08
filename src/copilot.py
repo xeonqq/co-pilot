@@ -85,13 +85,17 @@ class CoPilot(object):
         prev_cycle_time = time.perf_counter()
         for image, image_time in iter(self._pubsub.get, None):
             current_cycle_time = time.perf_counter()
-            logging("image time diff:", image_time - current_cycle_time)
+            # logging.debug("image time diff: %.2f ms" % ((current_cycle_time-image_time)*1000))
             logging.debug(
                 "cycle time %.2f ms" % ((current_cycle_time - prev_cycle_time) * 1000)
             )
             prev_cycle_time = current_cycle_time
+            logging.debug("recv image from: {}".format(image_time))
             self.process(image)
-            logging("process time:", time.perf_counter() - current_cycle_time)
+            logging.debug(
+                "process time: %.2f ms"
+                % ((time.perf_counter() - current_cycle_time) * 1000)
+            )
 
     def _led_on_given(self, objects_by_label, label):
         if label in objects_by_label:

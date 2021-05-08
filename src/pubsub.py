@@ -3,7 +3,7 @@ import queue
 
 class PubSub(object):
     def __init__(self):
-        self._messages = queue.Queue(1)
+        self._messages = queue.Queue(3)
 
     def get(self):
         return self._messages.get()

@@ -84,7 +84,7 @@ def main():
         led = Led(led_pin)
         camera_recorder = CameraRecorder(camera, led, args.blackbox_path)
         camera_capturer = CameraCapturer(
-            camera, 5, camera_recorder.is_recording, pubsub
+            camera, 2, camera_recorder.is_recording, pubsub
         )
         copilot = CoPilot(args, pubsub, blackbox, camera_info, led)
         copilot.run()
