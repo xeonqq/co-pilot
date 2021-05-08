@@ -77,7 +77,6 @@ def main():
     with picamera.PiCamera() as camera:
         # fps for recording
         camera.framerate = 20
-        camera.vflip = True
         camera.resolution = camera_info.resolution
         camera.exposure_mode = "sports"
 
