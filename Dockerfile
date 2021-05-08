@@ -5,10 +5,11 @@ MAINTAINER Qian Qian (xeonqq@gmail.com)
 ENV LANG C.UTF-8
 
 RUN apt-get update && apt-get install -y \
-    python3 \
+    python3.7 \
     python3-pip
 
-RUN ln -s $(which python3) /usr/local/bin/python
+RUN ln -s $(which python3.7) /usr/local/bin/python3
+RUN ln -s $(which python3.7) /usr/local/bin/python
 RUN python3 -m pip --no-cache-dir install --upgrade \
     "pip<20.3" \
     setuptools
@@ -37,7 +38,7 @@ RUN apt-get install -y python3-pycoral
 RUN apt-get install -y python3-tflite-runtime
 
 ADD requirements_docker.txt /tmp/requirements.txt
-RUN python3 -m pip install -r /tmp/requirements.txt
+RUN python3 -m pip install --no-cache-dir -r /tmp/requirements.txt
 
 ARG DEBIAN_FRONTEND=noninteractive
 ENV TZ=Europe/Berlin
