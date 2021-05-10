@@ -9,6 +9,7 @@ from src.copilot import CoPilot
 from src.utils import draw_objects
 from tests.test_fixture import TestFixture
 
+
 class Args(object):
     pass
 

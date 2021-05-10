@@ -11,6 +11,7 @@ from .camera_info import CameraInfo
 from .whitebox import WhiteBox
 from .image_saver import AsyncImageSaver
 from .abc import ILed
+from .speaker import Speaker
 
 
 def get_image_gen(args, camera_info):
@@ -49,7 +50,16 @@ def reprocess(args):
     image_saver = AsyncImageSaver(args.blackbox_path)
     whitebox = WhiteBox(image_saver, args.step)
 
-    copilot = CoPilot(args, pubsub, whitebox, camera_info, ILed(), make_interpreter(args.ssd_model), make_interpreter(args.traffic_light_classification_model))
+    copilot = CoPilot(
+        args,
+        pubsub,
+        whitebox,
+        camera_info,
+        ILed(),
+        Speaker(args.lang),
+        make_interpreter(args.ssd_model),
+        make_interpreter(args.traffic_light_classification_model),
+    )
 
     for image in get_image_gen(args, camera_info):
         copilot.process(image)
@@ -60,6 +70,12 @@ def reprocess(args):
 
 def parse_arguments():
     parser = argparse.ArgumentParser()
+
+    parser.add_argument(
+        "--lang",
+        help="co-pilot voice language",
+        default="en",
+    )
     parser.add_argument(
         "--blackbox_path",
         help="Output path for blackbox (images, detections, video)",

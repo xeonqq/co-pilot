@@ -11,20 +11,38 @@ class SlientSound(object):
         pass
 
 
+def get_en_sound_tracks():
+    return {
+        "visibility_clear": pygame.mixer.Sound(
+            "./sounds/red-alert/visibility-clear.wav"
+        ),
+        "1-up": pygame.mixer.Sound("./sounds/mario/smb_1-up.wav"),
+        "green": pygame.mixer.Sound("./sounds/en/green.wav"),
+        "red": pygame.mixer.Sound("./sounds/en/red.wav"),
+        "yellow": pygame.mixer.Sound("./sounds/en/yellow.wav"),
+        "red_yellow": pygame.mixer.Sound("./sounds/en/red-yellow.wav"),
+    }
+
+
+def get_cn_sound_tracks():
+    return {
+        "visibility_clear": pygame.mixer.Sound(
+            "./sounds/red-alert/visibility-clear.wav"
+        ),
+        "1-up": pygame.mixer.Sound("./sounds/mario/smb_1-up.wav"),
+        "green": pygame.mixer.Sound("./sounds/cn/green.wav"),
+        "red": pygame.mixer.Sound("./sounds/cn/red.wav"),
+        "yellow": pygame.mixer.Sound("./sounds/cn/yellow.wav"),
+        "red_yellow": pygame.mixer.Sound("./sounds/cn/red-yellow.wav"),
+    }
+
+
 class Speaker(object):
-    def __init__(self):
+    def __init__(self, lang="en"):
         pygame.mixer.init()
+        lang_sound_track_map = {"cn": get_cn_sound_tracks, "en": get_en_sound_tracks}
+        self._sound_tracks = lang_sound_track_map[lang]()
         self._last_played_time = 0
-        self._sound_tracks = {
-            "visibility_clear": pygame.mixer.Sound(
-                "./sounds/red-alert/visibility-clear.wav"
-            ),
-            "1-up": pygame.mixer.Sound("./sounds/mario/smb_1-up.wav"),
-            "green": pygame.mixer.Sound("./sounds/wife/green.wav"),
-            "red": pygame.mixer.Sound("./sounds/wife/red.wav"),
-            "yellow": pygame.mixer.Sound("./sounds/wife/yellow.wav"),
-            "red_yellow": pygame.mixer.Sound("./sounds/wife/red-yellow.wav"),
-        }
         self._prev_sound_key = None
 
     def play(self, key):

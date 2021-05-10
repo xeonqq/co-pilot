@@ -13,10 +13,16 @@ from .camera_info import CameraInfo
 from .copilot import CoPilot
 from .image_saver import AsyncImageSaver
 from .blackbox import BlackBox
+from .speaker import Speaker
 
 
 def parse_arguments():
     parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--lang",
+        help="co-pilot voice language",
+        default="en",
+    )
     parser.add_argument(
         "--blackbox_path",
         help="Output path for blackbox (images, detections, video)",
@@ -92,14 +98,21 @@ def main():
         camera_capturer = CameraCapturer(
             camera, 2.5, camera_recorder.is_recording, pubsub
         )
-
         if args.cpu:
             from tflite_runtime.interpreter import Interpreter as make_interpreter
         else:
             from pycoral.utils.edgetpu import make_interpreter
 
-        copilot = CoPilot(args, pubsub, blackbox, camera_info, led, make_interpreter(args.ssd_model),
-                          make_interpreter(args.traffic_light_classification_model))
+        copilot = CoPilot(
+            args,
+            pubsub,
+            blackbox,
+            camera_info,
+            led,
+            Speaker(args.lang),
+            make_interpreter(args.ssd_model),
+            make_interpreter(args.traffic_light_classification_model),
+        )
         copilot.run()
 
 

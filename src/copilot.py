@@ -18,14 +18,23 @@ from .utils import (
     union_of_intersected_objects,
     Object,
 )
-from .speaker import Speaker
 from .traffic_light_state_adaptor import TrafficLightStateAdaptor
 from .tracker import selected_driving_relevant, Tracker
 from .traffic_light import TrafficLight
 
 
 class CoPilot(object):
-    def __init__(self, args, pubsub, blackbox, camera_info, led, ssd_interpreter, traffic_light_classifier_interpreter):
+    def __init__(
+        self,
+        args,
+        pubsub,
+        blackbox,
+        camera_info,
+        led,
+        speaker,
+        ssd_interpreter,
+        traffic_light_classifier_interpreter,
+    ):
         self._camera_info = camera_info
         assert self._camera_info.resolution == (
             1120,  # 35 * 32, must be multiple of 32
@@ -45,7 +54,7 @@ class CoPilot(object):
         self._classfication_interpreter.allocate_tensors()
         self._traffic_light_size = common.input_size(self._classfication_interpreter)
 
-        self._speaker = Speaker()
+        self._speaker = speaker
 
         input_shape = self._ssd_interpreter.get_input_details()[0]["shape"]
         tile_w_overlap = 27
