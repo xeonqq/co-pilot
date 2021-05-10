@@ -7,3 +7,10 @@ class ILed(object):
 
     def toggle(self):
         pass
+
+class IBlackBox(object):
+    def log(self, *args):
+        pass
+
+    def stop_and_join(self):
+        pass

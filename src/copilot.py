@@ -1,6 +1,4 @@
 import logging
-import os
-import collections
 import time
 
 from PIL import Image
@@ -9,10 +7,8 @@ from pycoral.adapters import common
 from pycoral.adapters import detect
 from pycoral.adapters import classify
 from pycoral.utils.dataset import read_label_file
-from pycoral.utils.edgetpu import make_interpreter
 
 # from .button import Button
-from .image_saver import AsyncImageSaver
 from .utils import (
     crop_objects,
     tiles_location_gen,
@@ -29,7 +25,7 @@ from .traffic_light import TrafficLight
 
 
 class CoPilot(object):
-    def __init__(self, args, pubsub, blackbox, camera_info, led):
+    def __init__(self, args, pubsub, blackbox, camera_info, led, ssd_interpreter, traffic_light_classifier_interpreter):
         self._camera_info = camera_info
         assert self._camera_info.resolution == (
             1120,  # 35 * 32, must be multiple of 32
@@ -42,13 +38,10 @@ class CoPilot(object):
         self._tracker = Tracker(camera_info)
         self._traffic_light_state = TrafficLightStateAdaptor()
 
-        # resolution = (1280,960)
-        self._ssd_interpreter = make_interpreter(self._args.ssd_model)
+        self._ssd_interpreter = ssd_interpreter
         self._ssd_interpreter.allocate_tensors()
 
-        self._classfication_interpreter = make_interpreter(
-            self._args.traffic_light_classification_model
-        )
+        self._classfication_interpreter = traffic_light_classifier_interpreter
         self._classfication_interpreter.allocate_tensors()
         self._traffic_light_size = common.input_size(self._classfication_interpreter)
 

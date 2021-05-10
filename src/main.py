@@ -55,6 +55,12 @@ def parse_arguments():
         type=float,
         default=0.1,
     )
+    parser.add_argument(
+        "--cpu",
+        action="store_true",
+        help="use cpu instead of tpu (default)",
+    )
+
     return parser.parse_args()
 
 
@@ -86,7 +92,14 @@ def main():
         camera_capturer = CameraCapturer(
             camera, 2.5, camera_recorder.is_recording, pubsub
         )
-        copilot = CoPilot(args, pubsub, blackbox, camera_info, led)
+
+        if args.cpu:
+            from tflite_runtime.interpreter import Interpreter as make_interpreter
+        else:
+            from pycoral.utils.edgetpu import make_interpreter
+
+        copilot = CoPilot(args, pubsub, blackbox, camera_info, led, make_interpreter(args.ssd_model),
+                          make_interpreter(args.traffic_light_classification_model))
         copilot.run()
 
 

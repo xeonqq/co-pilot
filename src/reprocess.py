@@ -1,11 +1,10 @@
-import os
 import logging
 import time
 import argparse
 import pathlib
+
 from videoio import VideoReader
 from PIL import Image
-
 from .copilot import CoPilot
 from .pubsub import PubSub
 from .camera_info import CameraInfo
@@ -40,12 +39,17 @@ def get_image_gen(args, camera_info):
 
 
 def reprocess(args):
+    if args.cpu:
+        from tflite_runtime.interpreter import Interpreter as make_interpreter
+    else:
+        from pycoral.utils.edgetpu import make_interpreter
 
     pubsub = PubSub()
     camera_info = CameraInfo("config/intrinsics.yml")
     image_saver = AsyncImageSaver(args.blackbox_path)
     whitebox = WhiteBox(image_saver, args.step)
-    copilot = CoPilot(args, pubsub, whitebox, camera_info, ILed())
+
+    copilot = CoPilot(args, pubsub, whitebox, camera_info, ILed(), make_interpreter(args.ssd_model), make_interpreter(args.traffic_light_classification_model))
 
     for image in get_image_gen(args, camera_info):
         copilot.process(image)
@@ -126,6 +130,11 @@ def parse_arguments():
         "--step",
         action="store_true",
         help="only step the frame when any key press",
+    )
+    parser.add_argument(
+        "--cpu",
+        action="store_true",
+        help="use cpu or instead of tpu (default)",
     )
     return parser.parse_args()
 
