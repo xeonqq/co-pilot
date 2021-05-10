@@ -1,4 +1,4 @@
-
+[![Build Status](https://travis-ci.com/xeonqq/co-pilot.svg?branch=master)](https://travis-ci.com/xeonqq/co-pilot)
 
 <h2 align="center">Co-Pilot</h2>
 
