@@ -9,8 +9,14 @@ Traffic light alert and Dashcam all in one.
 ![](images/traffic_light_detection_seq.gif)
 
 ## Dependencies
-```bash
-python3 -m pip install -r requirements.txt
+```bash on rpi
+echo "deb https://packages.cloud.google.com/apt coral-edgetpu-stable main" | tee /etc/apt/sources.list.d/coral-edgetpu.list
+curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
+apt-get update
+apt-get install -y libedgetpu1-std
+apt-get install -y python3-pycoral
+apt-get install -y python3-tflite-runtime
+python3 -m pip install -r requirements_pi.txt
 sudo apt-get install libsdl2-mixer-2.0-0  libsdl2-2.0-0
 ```
 ## Run Co-Pilot
@@ -32,7 +38,7 @@ python3 -m tests.test_classification
 Build and run docker container
 ```bash
 ./build.sh
-./run_linux.sh
+./linux_run.sh
 ```
 
 In docker container

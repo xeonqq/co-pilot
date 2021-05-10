@@ -50,16 +50,20 @@ def reprocess(args):
     image_saver = AsyncImageSaver(args.blackbox_path)
     whitebox = WhiteBox(image_saver, args.step)
 
-    copilot = CoPilot(
-        args,
-        pubsub,
-        whitebox,
-        camera_info,
-        ILed(),
-        Speaker(args.lang),
-        make_interpreter(args.ssd_model),
-        make_interpreter(args.traffic_light_classification_model),
-    )
+    try:
+        copilot = CoPilot(
+            args,
+            pubsub,
+            whitebox,
+            camera_info,
+            ILed(),
+            Speaker(args.lang),
+            make_interpreter(args.ssd_model),
+            make_interpreter(args.traffic_light_classification_model),
+        )
+    except ValueError as e:
+        print(str(e) + "Use --cpu if you do not have a coral tpu")
+        return
 
     for image in get_image_gen(args, camera_info):
         copilot.process(image)

@@ -103,16 +103,20 @@ def main():
         else:
             from pycoral.utils.edgetpu import make_interpreter
 
-        copilot = CoPilot(
-            args,
-            pubsub,
-            blackbox,
-            camera_info,
-            led,
-            Speaker(args.lang),
-            make_interpreter(args.ssd_model),
-            make_interpreter(args.traffic_light_classification_model),
-        )
+        try:
+            copilot = CoPilot(
+                args,
+                pubsub,
+                blackbox,
+                camera_info,
+                led,
+                Speaker(args.lang),
+                make_interpreter(args.ssd_model),
+                make_interpreter(args.traffic_light_classification_model),
+            )
+        except ValueError as e:
+            print(str(e) + "Use --cpu if you do not have a coral tpu")
+            return
         copilot.run()
 
 

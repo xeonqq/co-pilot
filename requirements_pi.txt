@@ -1,0 +1,3 @@
+-r requirements.txt
+picamera==1.13
+RPi.GPIO==0.7.0
