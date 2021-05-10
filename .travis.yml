@@ -1,0 +1,9 @@
+language: python
+services:
+    - docker
+# command to install dependencies
+before_install:
+  - docker build -t co-pilot .
+# command to run tests
+script:
+  - docker run -v "$(pwd)":/workspace co-pilot:latest /bin/bash -c "cd workspace; pytest ."
