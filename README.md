@@ -8,7 +8,7 @@ Traffic light alert and Dashcam all in one.
 
 ![](images/traffic_light_detection_seq.gif)
 ## Watch the demo in car
-[![Watch the demo in car](https://img.youtube.com/vi/3rqdppF8GpE/hqdefault.jpg)](https://youtu.be/3rqdppF8GpE)
+[![Watch the demo in car](https://i.imgur.com/1PCb91b.png)](https://youtu.be/3rqdppF8GpE)
 
 ## Dependencies
 ```bash on rpi
