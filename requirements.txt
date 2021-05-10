@@ -1,3 +1,6 @@
--r requirements_docker.txt
-picamera==1.13
-RPi.GPIO==0.7.0
+scipy==1.6.3
+filterpy==1.4.5
+pygame==2.0.1
+pytest==6.2.3
+PyYAML==5.4.1
+

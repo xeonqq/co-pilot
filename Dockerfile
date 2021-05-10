@@ -37,7 +37,7 @@ RUN apt-get install -y libedgetpu1-std
 RUN apt-get install -y python3-pycoral
 RUN apt-get install -y python3-tflite-runtime
 
-ADD requirements_docker.txt /tmp/requirements.txt
+ADD requirements.txt /tmp/requirements.txt
 RUN python3 -m pip install --no-cache-dir -r /tmp/requirements.txt
 
 ARG DEBIAN_FRONTEND=noninteractive
