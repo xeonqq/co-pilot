@@ -18,8 +18,8 @@ print(call_time)
 while pygame.mixer.music.get_busy() == True:
     continue
 
-effect = pygame.mixer.Sound("./red-alert/good-to-go.mp3")
-effect2 = pygame.mixer.Sound("./red-alert/i-go-freely.mp3")
+effect = pygame.mixer.Sound("./en/green.wav")
+effect2 = pygame.mixer.Sound("./red-alert/visibility-clear.wav")
 start = time.perf_counter()
 channel = effect.play()
 call_time = time.perf_counter() - start
