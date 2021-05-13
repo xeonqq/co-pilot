@@ -54,7 +54,7 @@ class Speaker(object):
     def play(self, key):
         current_time = time.time()
 
-        if (key != self._prev_sound_key) and (
+        if (key != self._prev_sound_key) or (
             current_time - self._last_played_time > 1
         ):
             sound = self._sound_tracks.get(key, None)
