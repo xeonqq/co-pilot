@@ -20,3 +20,6 @@ class IBlackBox(object):
 class ISpeaker(object):
     def play(self, *args):
         pass
+
+    def play_ready(self):
+        pass
