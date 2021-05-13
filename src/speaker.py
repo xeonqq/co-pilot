@@ -44,16 +44,22 @@ class Speaker(object):
         self._sound_tracks = lang_sound_track_map[lang]()
         self._last_played_time = 0
         self._prev_sound_key = None
-        self._irrelevant_sound = {"visibility_clear", "1-up"}
-        
+
+    def play_ready(self):
+        sound = self._sound_tracks.get("visibility_clear", None)
+        if not sound:
+            return
+        sound.play()
+
     def play(self, key):
         current_time = time.time()
 
-        if (key != self._prev_sound_key) and (current_time - self._last_played_time > 1):
+        if (key != self._prev_sound_key) and (
+            current_time - self._last_played_time > 1
+        ):
             sound = self._sound_tracks.get(key, None)
             if not sound:
                 return
             channel = sound.play()
-            if key not in self._irrelevant_sound:
-                self._prev_sound_key = key
-                self._last_played_time = current_time
+            self._prev_sound_key = key
+            self._last_played_time = current_time

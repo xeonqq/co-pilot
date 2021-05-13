@@ -77,7 +77,7 @@ class CoPilot(object):
         self._traffic_light_infer_time_ms = 0
         # button_pin = 8
         # button = Button(button_pin)
-        self._speaker.play("visibility_clear")
+        self._speaker.play_ready()
         logging.info("Starting jounery on {}".format(time.strftime("%Y%m%d-%H%M%S")))
 
     def stop(self):
