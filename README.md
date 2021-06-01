@@ -6,6 +6,8 @@ Traffic light alert and Dashcam all in one.
 
 `Co-Pilot` = Raspberrypi 3/4 + rpi camera + Google Coral TPU.
 
+ <a class="bmc-button" target="_blank" href="https://www.buymeacoffee.com/xeonqq"><img src="https://cdn.buymeacoffee.com/buttons/bmc-new-btn-logo.svg" alt="Buy me a coffee 😇"><span style="margin-left:5px;font-size:19px !important;">Buy me a coffee 😇</span></a>
+ 
 ![](images/traffic_light_detection_seq.gif)
 ## Watch the demo in car
 [![Watch the demo in car](https://i.imgur.com/1PCb91b.png)](https://youtu.be/tCmUoWLdjoo)
