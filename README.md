@@ -14,7 +14,8 @@ Traffic light alert and Dashcam all in one.
 
 ## Hardware Setup
 ![](images/hardware.jpg)
-optional: [RTC DS3231](https://www.ebay.de/itm/223727782675?ssPageName=STRK%3AMEBIDX%3AIT&_trksid=p2060353.m2749.l2649)
+
+optional: [RTC DS3231](https://www.ebay.de/itm/223727782675?ssPageName=STRK%3AMEBIDX%3AIT&_trksid=p2060353.m2749.l2649), to have correct date on the dashcam video and log.
 
 ## Limitations
 * Currently works only with vertically placed traffic lights, optimized for Germany.
