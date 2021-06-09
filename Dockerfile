@@ -43,5 +43,6 @@ RUN python3 -m pip install --no-cache-dir -r /tmp/requirements.txt
 ARG DEBIAN_FRONTEND=noninteractive
 ENV TZ=Europe/Berlin
 RUN apt-get install -y python3-tk
+RUN apt-get update
 
 EXPOSE 5005
