@@ -20,6 +20,8 @@ class TestTrafficLightClassification(TestFixture):
 
         self.assertEqual(c, "red")
         self.assertGreater(score, 0.6)
+
+        # print(self._copilot._traffic_light_infer_time_ms) 0.00428 ms on cpu
         self.assertLess(self._copilot._traffic_light_infer_time_ms, 1)
 
 
