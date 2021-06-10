@@ -44,7 +44,6 @@ ARG DEBIAN_FRONTEND=noninteractive
 ENV TZ=Europe/Berlin
 RUN apt-get install -y python3-tk
 RUN apt-get update
-RUN apt-get install -y python3-opencv
-RUN python3 -m pip install opencv-contrib-python
+RUN python3 -m pip install opencv-contrib-python==4.4.0.46
 
 EXPOSE 5005

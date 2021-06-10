@@ -6,12 +6,12 @@ def create_tracker(tracker):
     OPENCV_OBJECT_TRACKERS = {
             "csrt": cv2.TrackerCSRT_create, # slow but accurate
             "kcf": cv2.TrackerKCF_create, # fast but easily lose track
-            "boosting": cv2.legacy.TrackerBoosting_create, # not good
+            "boosting": cv2.TrackerBoosting_create, # not good
             "mil": cv2.TrackerMIL_create, # not good, jumpy
             # "tld": cv2.TrackerTLD_create,
             # "goturn": cv2.TrackerGOTURN_create,
-            "medianflow": cv2.legacy.TrackerMedianFlow_create, # fast, works well
-            "mosse": cv2.legacy.TrackerMOSSE_create # does not work at all
+            "medianflow": cv2.TrackerMedianFlow_create, # fast, works well
+            "mosse": cv2.TrackerMOSSE_create # does not work at all
             }
     return OPENCV_OBJECT_TRACKERS[tracker]()
 

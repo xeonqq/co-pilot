@@ -29,6 +29,7 @@ apt-get update
 apt-get install -y libedgetpu1-std
 apt-get install -y python3-pycoral
 apt-get install -y python3-tflite-runtime
+python3 -m pip install --upgrade pip setuptools
 python3 -m pip install -r requirements_pi.txt
 sudo apt-get install libsdl2-mixer-2.0-0  libsdl2-2.0-0
 ```
