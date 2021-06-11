@@ -1,4 +1,5 @@
 import argparse
+import sys
 import logging
 import pathlib
 import time
@@ -14,6 +15,8 @@ from .copilot import CoPilot
 from .image_saver import AsyncImageSaver
 from .blackbox import BlackBox
 from .speaker import Speaker
+from .detector import Detector
+from .tracking import Tracking
 
 
 def parse_arguments():
@@ -27,6 +30,13 @@ def parse_arguments():
         "--blackbox_path",
         help="Output path for blackbox (images, detections, video)",
         default="/mnt/hdd",
+    )
+    parser.add_argument(
+        "-t",
+        "--tracker",
+        type=str,
+        default="medianflow",
+        help="OpenCV object tracker type",
     )
     parser.add_argument(
         "--ssd_model",
@@ -79,6 +89,7 @@ def main():
 
     log_path = args.blackbox_path.joinpath("co-pilot.log")
     logging.basicConfig(filename=str(log_path), level=logging.DEBUG)
+    # logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 
     camera_info = CameraInfo("config/intrinsics.yml")
     pubsub = PubSub()
@@ -93,31 +104,49 @@ def main():
         camera.exposure_mode = "sports"
 
         led_pin = 10
+        camera_capture_fps = 2.5
         led = Led(led_pin)
         camera_recorder = CameraRecorder(camera, led, args.blackbox_path)
         camera_capturer = CameraCapturer(
-            camera, 2.5, camera_recorder.is_recording, pubsub
+            camera, camera_capture_fps, camera_recorder.is_recording, pubsub
         )
+
         if args.cpu:
             from tflite_runtime.interpreter import Interpreter as make_interpreter
         else:
             from pycoral.utils.edgetpu import make_interpreter
 
         try:
-            copilot = CoPilot(
-                args,
-                pubsub,
-                blackbox,
-                camera_info,
-                led,
-                Speaker(args.lang),
-                make_interpreter(args.ssd_model),
-                make_interpreter(args.traffic_light_classification_model),
+
+            detector = Detector(make_interpreter(args.ssd_model), args)
+            tracking = Tracking(
+                args.tracker,
+                detector_id=detector.get_id(),
+                camera_capturer_id=camera_capturer.get_id(),
             )
+            camera_capturer.add_observer(detector)
+            camera_capturer.add_observer(tracking)
+            detector.add_observer(tracking)
+
+            camera_capturer.start()
+            detector.start()
+            tracking.start()
+            # copilot = CoPilot(
+            #     args,
+            #     pubsub,
+            #     blackbox,
+            #     camera_info,
+            #     led,
+            #     Speaker(args.lang),
+            # make_interpreter(args.ssd_model),
+            # make_interpreter(args.traffic_light_classification_model),
+            # )
         except ValueError as e:
             print(str(e) + "Use --cpu if you do not have a coral tpu")
             return
-        copilot.run()
+        # copilot.run()
+        while True:
+            pass
 
 
 if __name__ == "__main__":

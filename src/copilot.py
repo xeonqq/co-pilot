@@ -22,7 +22,6 @@ from .traffic_light_state_adaptor import TrafficLightStateAdaptor
 from .tracker import selected_driving_relevant, Tracker
 from .traffic_light import TrafficLight
 
-
 class CoPilot(object):
     def __init__(
         self,
@@ -47,12 +46,12 @@ class CoPilot(object):
         self._tracker = Tracker(camera_info)
         self._traffic_light_state = TrafficLightStateAdaptor()
 
-        self._ssd_interpreter = ssd_interpreter
-        self._ssd_interpreter.allocate_tensors()
-
-        self._classfication_interpreter = traffic_light_classifier_interpreter
-        self._classfication_interpreter.allocate_tensors()
-        self._traffic_light_size = common.input_size(self._classfication_interpreter)
+        # self._ssd_interpreter = ssd_interpreter
+        # self._ssd_interpreter.allocate_tensors()
+        #
+        # self._classfication_interpreter = traffic_light_classifier_interpreter
+        # self._classfication_interpreter.allocate_tensors()
+        # self._traffic_light_size = common.input_size(self._classfication_interpreter)
 
         self._speaker = speaker
 

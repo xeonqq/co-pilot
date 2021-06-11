@@ -61,7 +61,7 @@ def tracking_demo(tracker_name, video_file):
 		cv2.imshow("Tracking", frame)
 
 		# Exit if ESC pressed
-		k = cv2.waitKey(4) & 0xff
+		k = cv2.waitKey(500) & 0xff
 		if k == 27: break
 
 def main():
