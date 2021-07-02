@@ -30,16 +30,19 @@ class CoPilot(object):
         pubsub,
         blackbox,
         camera_info,
+        inference_config,
         led,
         speaker,
         ssd_interpreter,
         traffic_light_classifier_interpreter,
     ):
         self._camera_info = camera_info
+        self._inference_config = inference_config
+
         assert self._camera_info.resolution == (
             1120,  # 35 * 32, must be multiple of 32
-            848,
-        )  # 53 * 16, must be multiple of 16
+            624,
+        )  # Y * 16, must be multiple of 16
         self._args = args
         self._pubsub = pubsub
         self._blackbox = blackbox
@@ -57,8 +60,8 @@ class CoPilot(object):
         self._speaker = speaker
 
         input_shape = self._ssd_interpreter.get_input_details()[0]["shape"]
-        tile_w_overlap = 27
-        tile_h_overlap = 92
+        tile_w_overlap = 0
+        tile_h_overlap = 0
         tile_size = input_shape[1]
         self._tile_config = TileConfig(tile_size, tile_w_overlap, tile_h_overlap)
 
@@ -158,19 +161,21 @@ class CoPilot(object):
         )
         return classification_result
 
-    def detect(self, image):
-        img = image.crop(
-            [
-                0,
-                0,
-                self._camera_info.width,
-                int(self._camera_info.height * self._h_crop_keep_percentage),
-            ]
-        )
-
+    def detect(self, img):
         inference_time = 0
         objects_by_label = dict()
-        for tile_location in tiles_location_gen(img.size, self._tile_config):
+        # img = image.crop(
+        #        [
+        #            0,
+        #            0,
+        #            self._inference_config.inference_resolution[0],
+        #            self._inference_config.inference_resolution[1]
+        #            ]
+        #        )
+
+        for tile_location in tiles_location_gen(
+            self._inference_config.inference_resolution, self._tile_config
+        ):
             # print(tile_location)
             tile = img.crop(tile_location)
             common.set_input(self._ssd_interpreter, tile)

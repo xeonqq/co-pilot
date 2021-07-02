@@ -10,6 +10,7 @@ from .camera_capturer import CameraCapturer
 from .camera_recorder import CameraRecorder
 from .pubsub import PubSub
 from .camera_info import CameraInfo
+from .inference_config import InferenceConfig
 from .copilot import CoPilot
 from .image_saver import AsyncImageSaver
 from .blackbox import BlackBox
@@ -81,6 +82,7 @@ def main():
     logging.basicConfig(filename=str(log_path), level=logging.DEBUG)
 
     camera_info = CameraInfo("config/intrinsics.yml")
+    inference_config = InferenceConfig("config/inference_config.yml")
     pubsub = PubSub()
     image_saver = AsyncImageSaver(args.blackbox_path)
 
@@ -96,7 +98,7 @@ def main():
         led = Led(led_pin)
         camera_recorder = CameraRecorder(camera, led, args.blackbox_path)
         camera_capturer = CameraCapturer(
-            camera, 2.5, camera_recorder.is_recording, pubsub
+            camera, 5, camera_recorder.is_recording, pubsub, inference_config
         )
         if args.cpu:
             from tflite_runtime.interpreter import Interpreter as make_interpreter
@@ -109,6 +111,7 @@ def main():
                 pubsub,
                 blackbox,
                 camera_info,
+                inference_config,
                 led,
                 Speaker(args.lang),
                 make_interpreter(args.ssd_model),
