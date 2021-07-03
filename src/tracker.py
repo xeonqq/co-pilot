@@ -23,13 +23,12 @@ LaneWidth = 3
 class TrafficLightTrack(object):
     TrackID = 0
 
-    def __init__(self, camera_info, traffic_light):
+    def __init__(self, traffic_light):
         TrafficLightTrack.TrackID += 1
         self._track_id = TrafficLightTrack.TrackID
 
         self._traffic_light = traffic_light
         self._bbox = traffic_light.obj.bbox
-        self._camera_info = camera_info
         # self._update_position()
         self._energy_upper_bound = 3
         self._energy = self._energy_upper_bound
@@ -57,25 +56,24 @@ class TrafficLightTrack(object):
         self._kf.P *= 100
         self._kf.R *= 1
 
-    def _update_position(self):
-        # position for now is just a unit vector pointing from camera to center of traffic light
-
-        traffic_light_camera_frame = self._camera_info.pixel_to_camera_frame(
-            self._traffic_light.center
-        )
-
-        self._direction_vec = traffic_light_camera_frame / np.linalg.norm(
-            traffic_light_camera_frame
-        )
-
-        h_w_pixel_ratio = self._traffic_light.height / self._traffic_light.width
-        if h_w_pixel_ratio > TrafficLight.H_W_RATIO:  # pixel height more trustworthy
-            scale = TrafficLight.WORLD_HEIGHT / self._traffic_light.height
-        else:
-            scale = TrafficLight.WORLD_WIDTH / self._traffic_light.width
-
-        self._pos_approx_cam_frame = traffic_light_camera_frame * scale
-
+    # def _update_position(self):
+    #     position for now is just a unit vector pointing from camera to center of traffic light
+    #
+    # traffic_light_camera_frame = self._camera_info.pixel_to_camera_frame(
+    #     self._traffic_light.center
+    # )
+    #
+    # self._direction_vec = traffic_light_camera_frame / np.linalg.norm(
+    #     traffic_light_camera_frame
+    # )
+    #
+    # h_w_pixel_ratio = self._traffic_light.height / self._traffic_light.width
+    # if h_w_pixel_ratio > TrafficLight.H_W_RATIO:  # pixel height more trustworthy
+    #     scale = TrafficLight.WORLD_HEIGHT / self._traffic_light.height
+    # else:
+    #     scale = TrafficLight.WORLD_WIDTH / self._traffic_light.width
+    #
+    # self._pos_approx_cam_frame = traffic_light_camera_frame * scale
     @property
     def id(self):
         return self._track_id
@@ -244,8 +242,8 @@ def selected_driving_relevant(detected_traffic_lights, camera_info):
 
 
 class Tracker(object):
-    def __init__(self, camera_info):
-        self._camera_info = camera_info
+    def __init__(self, inference_config):
+        self._inference_config = inference_config
         self._traffic_light_tracks = []
         self._driving_relevant_track = None
 
@@ -285,7 +283,7 @@ class Tracker(object):
         # print("existing tracks: ", self._traffic_light_tracks)
         if not self._traffic_light_tracks:
             self._traffic_light_tracks = [
-                TrafficLightTrack(self._camera_info, traffic_light)
+                TrafficLightTrack(traffic_light)
                 for traffic_light in traffic_lights
             ]
             # print("init: ", self._traffic_light_tracks)
@@ -311,7 +309,7 @@ class Tracker(object):
             # print("new:", newly_detected_inds)
             for ind in newly_detected_inds:
                 self._traffic_light_tracks.append(
-                    TrafficLightTrack(self._camera_info, traffic_lights[ind])
+                    TrafficLightTrack(traffic_lights[ind])
                 )
 
         self._prune_tracks()
@@ -330,7 +328,7 @@ class Tracker(object):
     def _vote_for_driving_relevant(self):
         scores = []
         view_center = np.array(
-            [self._camera_info.pixel_center[0], self._camera_info.pixel_center[1] * 0.6]
+            [self._inference_config.pixel_center[0], self._inference_config.pixel_center[1] * 0.6]
         )
         for track in self._traffic_light_tracks:
             d = np.linalg.norm(track.center - view_center)

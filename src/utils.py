@@ -1,5 +1,4 @@
 import collections
-import pathlib
 import numpy as np
 
 from PIL import ImageDraw, Image
@@ -314,10 +313,3 @@ def crop_objects(image, objects):
     return [crop_object(image, obj) for obj in objects]
 
 
-def image_gen(image_folder_path, camera_info):
-    path_to_test_images = pathlib.Path(image_folder_path)
-    image_paths = sorted(list(path_to_test_images.glob("*.jpg")))
-    for image_path in image_paths:
-        image = Image.open(image_path, "r").convert("RGB")
-        image = image.resize(camera_info.resolution)
-        yield image

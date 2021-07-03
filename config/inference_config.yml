@@ -1,3 +1,6 @@
 ---
 infer_image_width: 600
 infer_image_height: 300
+tile_size: 300
+tile_w_overlap: 0
+tile_h_overlap: 0

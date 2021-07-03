@@ -5,6 +5,8 @@ import pathlib
 
 from videoio import VideoReader
 from PIL import Image
+
+from .inference_config import InferenceConfig
 from .copilot import CoPilot
 from .pubsub import PubSub
 from .camera_info import CameraInfo
@@ -14,8 +16,7 @@ from .abc import ILed
 from .speaker import Speaker
 
 
-def get_image_gen(args, camera_info):
-
+def get_image_gen(args, inference_config):
     if args.video:
         default_fps = 20
         for i, frame in enumerate(VideoReader(args.video)):
@@ -25,7 +26,10 @@ def get_image_gen(args, camera_info):
             image = Image.fromarray(frame)
             if args.flip:
                 image = image.transpose(method=Image.FLIP_TOP_BOTTOM)
-            image = image.resize(camera_info.resolution)
+
+            inference_w, inference_h = inference_config.inference_resolution
+            box = (0, 0, image.size[0], min(image.size[0] * inference_h / inference_w, image.size[1]))
+            image = image.resize(inference_config.inference_resolution, box=box)
             yield image
 
     if args.images:
@@ -33,7 +37,9 @@ def get_image_gen(args, camera_info):
         image_paths = sorted(list(path_to_test_images.glob("*.jpg")))
         for image_path in image_paths:
             image = Image.open(image_path, "r").convert("RGB")
-            image = image.resize(camera_info.resolution)
+            inference_w, inference_h = inference_config.inference_resolution
+            box = (0, 0, image.size[0], min(image.size[0] * inference_h / inference_w, image.size[1]))
+            image = image.resize(inference_config.inference_resolution, box=box)
             yield image
     else:
         assert "must provide --video or --images"
@@ -47,6 +53,7 @@ def reprocess(args):
 
     pubsub = PubSub()
     camera_info = CameraInfo("config/intrinsics.yml")
+    inference_config = InferenceConfig("config/inference_config.yml")
     image_saver = AsyncImageSaver(args.blackbox_path)
     whitebox = WhiteBox(image_saver, args.step)
 
@@ -56,6 +63,7 @@ def reprocess(args):
             pubsub,
             whitebox,
             camera_info,
+            inference_config,
             ILed(),
             Speaker(args.lang),
             make_interpreter(args.ssd_model),
@@ -65,7 +73,7 @@ def reprocess(args):
         print(str(e) + "Use --cpu if you do not have a coral tpu")
         return
 
-    for image in get_image_gen(args, camera_info):
+    for image in get_image_gen(args, inference_config):
         copilot.process(image)
         # if args.real_time:
         #    time.sleep(0.05)

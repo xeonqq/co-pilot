@@ -17,7 +17,8 @@ class Args(object):
 class TestDetection(TestFixture):
     def test_detection_with_sample_image(self):
         image = Image.open("tests/traffic_light_scene.jpg", "r")
-        image = image.resize(self._camera_info.resolution)
+
+        image = self.resize_image_to_inference_resolution(image)
 
         objects_by_label = self._copilot.detect(image)
 

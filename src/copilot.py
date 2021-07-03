@@ -47,7 +47,7 @@ class CoPilot(object):
         self._pubsub = pubsub
         self._blackbox = blackbox
 
-        self._tracker = Tracker(camera_info)
+        self._tracker = Tracker(inference_config)
         self._traffic_light_state = TrafficLightStateAdaptor()
 
         self._ssd_interpreter = ssd_interpreter
@@ -60,9 +60,9 @@ class CoPilot(object):
         self._speaker = speaker
 
         input_shape = self._ssd_interpreter.get_input_details()[0]["shape"]
-        tile_w_overlap = 0
-        tile_h_overlap = 0
-        tile_size = input_shape[1]
+        tile_w_overlap, tile_h_overlap = self._inference_config.tile_overlap
+        tile_size = self._inference_config.tile_size
+        assert (tile_size == input_shape[1])
         self._tile_config = TileConfig(tile_size, tile_w_overlap, tile_h_overlap)
 
         self._ssd_labels = read_label_file(self._args.label) if self._args.label else {}
