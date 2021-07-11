@@ -19,7 +19,7 @@ optional: [RTC DS3231](https://www.ebay.de/itm/223727782675?ssPageName=STRK%3AME
 
 ## Limitations
 * Currently works only with vertically placed traffic lights, optimized for Germany.
-* Delay of ~0.5 sec for each detection (Rpi 4 might have better performance, didn't have one to test)
+* Delay of ~0.3 sec for each detection (Rpi 4 might have better performance, didn't have one to test)
 
 ## Dependencies
 ```bash on rpi
