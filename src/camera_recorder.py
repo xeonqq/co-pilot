@@ -21,36 +21,14 @@ class CameraRecorder(object):
     def fps(self):
         return self._camera.framerate
 
-    @property
-    def filename(self):
-        return self._filename
-
     def is_recording(self):
         return self._is_recording
 
-    # def _add_convert_mp4_event(self):
-    #    self._events.put(ConvertMP4Event(self))
-
-    # def _process_event(self):
-    #    if not self._events.empty():
-    #        evt = self._events.get()
-    #        evt.execute()
-
     def _start_recording(self):
-        self._filename = "{}/recording_{}.mp4".format(
-            self._folder, time.strftime("%Y%m%d-%H%M%S")
-        )
-        logging.info("start recording, saving to {}".format(self._filename))
-        self._tape.open(self._filename)
+        logging.info("start recording, saving at {}".format(self._folder))
+        self._tape.save_at(self._folder)
         self._camera.start_recording(self._tape, format=self._format)
         self._is_recording = True
-
-    # def on_enter_idle(self):
-    #    logging.info("stop recording...")
-    #    self._led.off()
-    #    self._camera.stop_recording()
-    #    self._tape.close()
-    #    self._add_convert_mp4_event()
 
     def _run(self):
         self._start_recording()
