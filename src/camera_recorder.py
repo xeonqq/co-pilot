@@ -10,7 +10,8 @@ class CameraRecorder(object):
         self._folder.mkdir(parents=True, exist_ok=True)
         self._camera = camera
         self._led = led
-        self._tape = Tape()
+        self._format = "h264"
+        self._tape = Tape(self.fps, self._format)
         self._is_recording = False
         # self._button.add_pressed_cb(self._add_toggle_event)
         self._thread = threading.Thread(target=self._run, daemon=True)
@@ -36,12 +37,12 @@ class CameraRecorder(object):
     #        evt.execute()
 
     def _start_recording(self):
-        self._filename = "{}/recording_{}.h264".format(
+        self._filename = "{}/recording_{}.mp4".format(
             self._folder, time.strftime("%Y%m%d-%H%M%S")
         )
         logging.info("start recording, saving to {}".format(self._filename))
         self._tape.open(self._filename)
-        self._camera.start_recording(self._tape, format="h264")
+        self._camera.start_recording(self._tape, format=self._format)
         self._is_recording = True
 
     # def on_enter_idle(self):
