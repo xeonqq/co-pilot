@@ -1,4 +1,5 @@
 import subprocess
+import time
 import threading
 import io
 import queue
@@ -24,11 +25,15 @@ class Tape(object):
             shutil.copyfileobj(data, self._proc.stdin)
             data.close()
 
-    def open(self, filename):
-        self._filepath = filename
+    def save_at(self, folder):
+        self._filepath = "{}/recording_{}_%03d.mp4".format(
+            folder, time.strftime("%Y%m%d-%H%M%S")
+        )
         self._ffmpeg_cmd = """ffmpeg -v 16 -framerate {0} -f {1}
-                                    -i pipe:0 -codec copy -movflags faststart
-                                    -y -f mp4 {2}""".format(
+                                    -i pipe:0 -codec copy 
+                                    -movflags faststart
+                                    -segment_time 00:05:00 -f segment -reset_timestamps 1
+                                    -y {2}""".format(
             self._fps,
             self._format,
             self._filepath)
@@ -51,12 +56,12 @@ class Tape(object):
         if self._buffer_size > Tape.MAX_BUFFER_SIZE:
             self._write_buffer_to_queue()
 
-    def flush(self):
+    def _flush(self):
         if self._buffer_size > 0:
             self._write_buffer_to_queue()
 
     def close(self):
-        self.flush()
+        self._flush()
         self._tape_queue.put(None)
         self._thread.join()
 
