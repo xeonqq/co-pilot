@@ -32,13 +32,11 @@ class Tape(object):
         self._ffmpeg_cmd = """ffmpeg -v 16 -framerate {0} -f {1}
                                     -i pipe:0 -codec copy 
                                     -movflags faststart
-                                    -segment_time 00:05:00 -f segment -reset_timestamps 1
+                                    -segment_time 00:01:00 -f segment -reset_timestamps 1
                                     -y {2}""".format(
-            self._fps,
-            self._format,
-            self._filepath)
-        self._proc = subprocess.Popen(self._ffmpeg_cmd.split(),
-                                      stdin=subprocess.PIPE)
+            self._fps, self._format, self._filepath
+        )
+        self._proc = subprocess.Popen(self._ffmpeg_cmd.split(), stdin=subprocess.PIPE)
 
         self._thread = threading.Thread(target=self._record)
         self._thread.start()
