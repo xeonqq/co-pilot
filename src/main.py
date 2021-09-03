@@ -2,6 +2,7 @@ import argparse
 import logging
 import pathlib
 import time
+import pygame
 
 import picamera
 
@@ -72,55 +73,63 @@ def parse_arguments():
 
 
 def main():
-    args = parse_arguments()
-    args.blackbox_path = pathlib.Path(args.blackbox_path).joinpath(
-        time.strftime("%Y%m%d-%H%M%S")
-    )
-    args.blackbox_path.mkdir(parents=True, exist_ok=True)
-
-    log_path = args.blackbox_path.joinpath("co-pilot.log")
-    logging.basicConfig(filename=str(log_path), level=logging.DEBUG)
-
-    camera_info = CameraInfo("config/intrinsics.yml")
-    inference_config = InferenceConfig("config/inference_config.yml")
-    pubsub = PubSub()
-    image_saver = AsyncImageSaver(args.blackbox_path)
-
-    blackbox = BlackBox(image_saver)
-
-    with picamera.PiCamera() as camera:
-        # fps for recording
-        camera.framerate = 20
-        camera.resolution = camera_info.resolution
-        camera.exposure_mode = "sports"
-
-        led_pin = 10
-        led = Led(led_pin)
-        camera_recorder = CameraRecorder(camera, led, args.blackbox_path)
-        camera_capturer = CameraCapturer(
-            camera, 5, camera_recorder.is_recording, pubsub, inference_config
+    try:
+        args = parse_arguments()
+        args.blackbox_path = pathlib.Path(args.blackbox_path).joinpath(
+            time.strftime("%Y%m%d-%H%M%S")
         )
-        if args.cpu:
-            from tflite_runtime.interpreter import Interpreter as make_interpreter
-        else:
-            from pycoral.utils.edgetpu import make_interpreter
+        args.blackbox_path.mkdir(parents=True, exist_ok=True)
 
-        try:
-            copilot = CoPilot(
-                args,
-                pubsub,
-                blackbox,
-                camera_info,
-                inference_config,
-                led,
-                Speaker(args.lang),
-                make_interpreter(args.ssd_model),
-                make_interpreter(args.traffic_light_classification_model),
+        log_path = args.blackbox_path.joinpath("co-pilot.log")
+        logging.basicConfig(filename=str(log_path), level=logging.DEBUG)
+
+        camera_info = CameraInfo("config/intrinsics.yml")
+        inference_config = InferenceConfig("config/inference_config.yml")
+        pubsub = PubSub()
+        image_saver = AsyncImageSaver(args.blackbox_path)
+
+        blackbox = BlackBox(image_saver)
+
+        with picamera.PiCamera() as camera:
+            # fps for recording
+            camera.framerate = 20
+            camera.resolution = camera_info.resolution
+            camera.exposure_mode = "sports"
+
+            led_pin = 10
+            led = Led(led_pin)
+            camera_recorder = CameraRecorder(camera, led, args.blackbox_path)
+            camera_capturer = CameraCapturer(
+                camera, 5, camera_recorder.is_recording, pubsub, inference_config
             )
-        except ValueError as e:
-            print(str(e) + "Use --cpu if you do not have a coral tpu")
-            return
-        copilot.run()
+            if args.cpu:
+                from tflite_runtime.interpreter import Interpreter as make_interpreter
+            else:
+                from pycoral.utils.edgetpu import make_interpreter
+
+            try:
+                copilot = CoPilot(
+                    args,
+                    pubsub,
+                    blackbox,
+                    camera_info,
+                    inference_config,
+                    led,
+                    Speaker(args.lang),
+                    make_interpreter(args.ssd_model),
+                    make_interpreter(args.traffic_light_classification_model),
+                )
+            except ValueError as e:
+                print(str(e) + "Use --cpu if you do not have a coral tpu")
+                return
+            copilot.run()
+
+    except Exception as e:
+        s = Speaker(args.lang)
+        s.play_dead()
+        logging.critical(str(e))
+        print(str(e))
+        exit(1)
 
 
 if __name__ == "__main__":

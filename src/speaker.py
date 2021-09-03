@@ -16,6 +16,7 @@ def get_en_sound_tracks():
         "visibility_clear": pygame.mixer.Sound(
             "./sounds/red-alert/visibility-clear.wav"
         ),
+        "dead": pygame.mixer.Sound("./sounds/red-alert/im-gone.wav"),
         "1-up": pygame.mixer.Sound("./sounds/mario/smb_1-up.wav"),
         "green": pygame.mixer.Sound("./sounds/en/green.wav"),
         "red": pygame.mixer.Sound("./sounds/en/red.wav"),
@@ -29,6 +30,7 @@ def get_cn_sound_tracks():
         "visibility_clear": pygame.mixer.Sound(
             "./sounds/red-alert/visibility-clear.wav"
         ),
+        "dead": pygame.mixer.Sound("./sounds/red-alert/im-gone.wav"),
         "1-up": pygame.mixer.Sound("./sounds/mario/smb_1-up.wav"),
         "green": pygame.mixer.Sound("./sounds/cn/green.wav"),
         "red": pygame.mixer.Sound("./sounds/cn/red.wav"),
@@ -51,12 +53,18 @@ class Speaker(object):
             return
         sound.play()
 
+    def play_dead(self):
+        sound = self._sound_tracks.get("dead", None)
+        if not sound:
+            return
+        channel = sound.play()
+        while channel.get_busy():
+            pass
+
     def play(self, key):
         current_time = time.time()
 
-        if (key != self._prev_sound_key) or (
-            current_time - self._last_played_time > 1
-        ):
+        if (key != self._prev_sound_key) or (current_time - self._last_played_time > 1):
             sound = self._sound_tracks.get(key, None)
             if not sound:
                 return
