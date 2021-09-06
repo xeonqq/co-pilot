@@ -35,7 +35,7 @@ sudo apt-get install libsdl2-mixer-2.0-0  libsdl2-2.0-0
 # instal ffmpeg
 cd ~ && git clone --depth 1 https://code.videolan.org/videolan/x264
 cd x264
-./configure --host=arm-unknown-linux-gnueabi --enable-static --disable-openc
+./configure --host=arm-unknown-linux-gnueabi --enable-static --disable-opencl
 make -j4 && sudo make install
 cd ~ && git clone git://source.ffmpeg.org/ffmpeg --depth=1
 ./configure --extra-ldflags="-latomic" --arch=armel --target-os=linux --enable-gpl --enable-omx --enable-omx-rpi --enable-nonfree
