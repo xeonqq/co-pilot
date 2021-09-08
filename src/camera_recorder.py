@@ -1,11 +1,10 @@
 import threading
-import time
 import logging
 from .tape import Tape
 
 
 class CameraRecorder(object):
-    def __init__(self, camera, led, recording_folder):
+    def __init__(self, camera, led, recording_folder, daemon=True):
         self._folder = recording_folder
         self._folder.mkdir(parents=True, exist_ok=True)
         self._camera = camera
@@ -13,9 +12,9 @@ class CameraRecorder(object):
         self._format = "h264"
         self._tape = Tape(self.fps, self._format)
         self._is_recording = False
-        # self._button.add_pressed_cb(self._add_toggle_event)
-        self._thread = threading.Thread(target=self._run, daemon=True)
-        self._thread.start()
+        if daemon:
+            self._thread = threading.Thread(target=self.run, daemon=True)
+            self._thread.start()
 
     @property
     def fps(self):
@@ -30,7 +29,7 @@ class CameraRecorder(object):
         self._camera.start_recording(self._tape, format=self._format)
         self._is_recording = True
 
-    def _run(self):
+    def run(self):
         self._start_recording()
         while True:
             self._camera.wait_recording(1)
