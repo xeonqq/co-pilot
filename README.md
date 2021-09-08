@@ -46,6 +46,10 @@ make -j4 && sudo make install
 python3 -m src.main  --ssd_model models/ssd_mobilenet_v2_coco_quant_no_nms_edgetpu.tflite  --label models/coco_labels.txt --score_threshold 0.3 --traffic_light_classification_model models/traffic_light_edgetpu.tflite  --traffic_light_label models/traffic_light_labels.txt --blackbox_path=./
 ```
 I use [superviser](http://supervisord.org/) to start co-pilot at RPI boot up.
+## Run Dashcam only mode
+```bash
+python3 -m src.dashcam
+```
 
 ## Adjust volume
 Once you've SSH'd into your Pi, type "alsamixer". This will bring up an interface within the terminal which will allow you to set the volume of the Raspberry Pi. Simply press the up and down arrow keys to either increase or decrease the volume. When you are done, press ESC.
