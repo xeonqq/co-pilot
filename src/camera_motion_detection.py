@@ -12,7 +12,10 @@ class CameraMotionDetection(object):
         self._camera = camera
         self._dt = 1.0 / fps
 
-        self._capture_resolution = (motion_detection_config.width, motion_detection_config.height)
+        self._capture_resolution = (
+            motion_detection_config.width,
+            motion_detection_config.height,
+        )
         self._num_pixels = self._capture_resolution[0] * self._capture_resolution[1]
         self._observers = []
 
@@ -39,9 +42,13 @@ class CameraMotionDetection(object):
             )
             self._stream.truncate()
             self._stream.seek(0)
-            Y = np.fromfile(self._stream, dtype=np.uint8, count=self._num_pixels). \
-                reshape((self._capture_resolution[1], self._capture_resolution[0]))
+            Y = np.frombuffer(
+                self._stream.getvalue(), dtype=np.uint8, count=self._num_pixels
+            ).reshape((self._capture_resolution[1], self._capture_resolution[0]))
             if self._motion_detector.has_motion_in_image(Y):
                 self._notify()
-            logging.debug("capture+motion: {} ms".format((time.perf_counter() - start) * 1000))
+                logging.debug("motion detected!")
+            logging.debug(
+                "capture+motion: {} ms".format((time.perf_counter() - start) * 1000)
+            )
             time.sleep(self._dt)
