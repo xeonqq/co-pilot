@@ -2,6 +2,7 @@ import unittest
 import cv2 as cv
 import numpy as np
 from .context import src
+from collections import namedtuple
 from src.motion_detector import MotionDetector
 
 
@@ -9,9 +10,15 @@ def count_motion_frames(motion_detection_results):
     return sum(x is True for x in motion_detection_results)
 
 
+MotionDetectorConfig = namedtuple(
+    "MotionDetectorConfig", ["width", "height"]
+)
+
 class MotionDetectorTest(unittest.TestCase):
     def test_detect_motion_from_video(self):
-        motion_detector = MotionDetector()
+        config = MotionDetectorConfig(240, 180)
+        motion_detector = MotionDetector(config)
+
         input_video = "tests/test_videos/recording_20210908-212416_049_car.mp4"
         capture = cv.VideoCapture(input_video)
         motion_detection_results = []

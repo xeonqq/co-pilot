@@ -1,0 +1,22 @@
+---
+calibration_time: "Sun Apr 18 19:00:49 2021"
+image_width: 240
+image_height: 180
+board_width: 7
+board_height: 9
+square_size: 1.9999999552965164e-02
+flags: 0
+camera_matrix:
+   rows: 3
+   cols: 3
+   dt: d
+   data: [ 8.8966044022157462e+02, 0., 5.7386190557717941e+02, 0.,
+           8.8906627459310187e+02, 4.4165951967861207e+02, 0., 0., 1. ]
+distortion_coefficients:
+   rows: 5
+   cols: 1
+   dt: d
+   data: [ 1.6559903359650555e-01, -2.3699236295884923e-01,
+           1.7367365999340491e-03, 3.7145145879884903e-03,
+           -3.7928369307685550e-01 ]
+avg_reprojection_error: 1.8685370843315996e-01
