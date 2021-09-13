@@ -15,6 +15,11 @@ class StopEvent(object):
         camera_recorder._stop_recording()
 
 
+class MotionEvent(object):
+    def execute(self, camera_recorder):
+        pass
+
+
 class CameraRecorder(object):
     def __init__(self, camera, led, recording_folder, daemon=True):
         self._folder = recording_folder
@@ -69,3 +74,6 @@ class CameraRecorder(object):
                 self._led.off()
                 self.process_event()
                 time.sleep(0.05)
+
+    def notify(self, motion_detection):
+        self._event_queue.put(MotionEvent())
