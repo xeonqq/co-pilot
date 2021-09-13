@@ -4,7 +4,7 @@ import pathlib
 
 import picamera
 
-from src.camera_recorder_controller import CameraRecorderController
+from .camera_recorder_controller import CameraRecorderController
 from .os_utils import generate_recording_postfix
 from .camera_recorder import CameraRecorder
 from .camera_info import CameraInfo
@@ -50,6 +50,7 @@ def main():
         logging.basicConfig(filename=str(log_path), level=logging.DEBUG)
 
         camera_info = CameraInfo("config/dashcam.yml")
+        motion_detection_config = CameraInfo("config/motion_detection_config.yml")
 
         with picamera.PiCamera() as camera:
             # fps for recording
