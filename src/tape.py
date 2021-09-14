@@ -65,4 +65,4 @@ class Tape(object):
 
         self._proc.stdin.flush()
         self._proc.stdin.close()
-        self._proc_wait()
+        self._proc.wait()

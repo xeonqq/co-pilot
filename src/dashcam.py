@@ -47,7 +47,12 @@ def main():
         args.blackbox_path.mkdir(parents=True, exist_ok=True)
 
         log_path = args.blackbox_path.joinpath("dashcam.log")
-        logging.basicConfig(filename=str(log_path), level=logging.DEBUG)
+        logging.basicConfig(
+            filename=str(log_path),
+            format="%(asctime)s %(levelname)-6s %(message)s",
+            level=logging.DEBUG,
+            datefmt="%Y-%m-%d %H:%M:%S",
+        )
 
         camera_info = CameraInfo("config/dashcam.yml")
         motion_detection_config = CameraInfo("config/motion_detection_config.yml")
@@ -60,13 +65,17 @@ def main():
             camera.vflip = args.vflip
             camera.hflip = args.hflip
 
-            camera_recorder = CameraRecorder(camera, ILed(), args.blackbox_path, daemon=False)
+            camera_recorder = CameraRecorder(
+                camera, ILed(), args.blackbox_path, daemon=False
+            )
             start_recording = True
 
             if args.record_on_motion:
                 from src.camera_motion_detection import CameraMotionDetection
-                camera_motion_detection = CameraMotionDetection(camera, 10,
-                                                                CameraInfo("config/motion_detection_config.yml"))
+
+                camera_motion_detection = CameraMotionDetection(
+                    camera, 10, CameraInfo("config/motion_detection_config.yml")
+                )
                 camera_recorder_controller = CameraRecorderController(camera_recorder)
                 camera_motion_detection.add_observer(camera_recorder_controller)
                 start_recording = False
