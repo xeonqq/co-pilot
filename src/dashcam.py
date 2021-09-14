@@ -4,7 +4,7 @@ import pathlib
 
 import picamera
 
-from src.camera_motion_detection import CameraMotionDetection
+from src.camera_recorder_controller import CameraRecorderController
 from .os_utils import generate_recording_postfix
 from .camera_recorder import CameraRecorder
 from .camera_info import CameraInfo
@@ -50,7 +50,6 @@ def main():
         logging.basicConfig(filename=str(log_path), level=logging.DEBUG)
 
         camera_info = CameraInfo("config/dashcam.yml")
-        motion_detection_config = CameraInfo("config/motion_detection_config.yml")
 
         with picamera.PiCamera() as camera:
             # fps for recording
@@ -61,9 +60,17 @@ def main():
             camera.hflip = args.hflip
 
             camera_recorder = CameraRecorder(camera, ILed(), args.blackbox_path, daemon=False)
-            camera_motion_detection = CameraMotionDetection(camera, 10, motion_detection_config)
-            camera_motion_detection.add_observer(camera_recorder)
-            camera_recorder.run()
+            start_recording = True
+
+            if args.record_on_motion:
+                from src.camera_motion_detection import CameraMotionDetection
+                camera_motion_detection = CameraMotionDetection(camera, 10,
+                                                                CameraInfo("config/motion_detection_config.yml"))
+                camera_recorder_controller = CameraRecorderController(camera_recorder)
+                camera_motion_detection.add_observer(camera_recorder_controller)
+                start_recording = False
+
+            camera_recorder.run(start_recording)
 
     except Exception as e:
         logging.critical(str(e))
