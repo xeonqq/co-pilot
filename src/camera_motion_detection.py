@@ -26,7 +26,7 @@ class CameraMotionDetection(object):
 
     def _notify(self):
         for obs in self._observers:
-            obs.notify(self)
+            obs.notify_on_motion(self)
 
     def _run(self):
         while True:

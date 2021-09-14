@@ -15,11 +15,6 @@ class StopEvent(object):
         camera_recorder._stop_recording()
 
 
-class MotionEvent(object):
-    def execute(self, camera_recorder):
-        pass
-
-
 class CameraRecorder(object):
     def __init__(self, camera, led, recording_folder, daemon=True):
         self._folder = recording_folder
@@ -48,23 +43,27 @@ class CameraRecorder(object):
         self._event_queue.put(StopEvent())
 
     def _start_recording(self):
-        logging.info("start recording, saving at {}".format(self._folder))
-        self._tape.save_at(self._folder)
-        self._camera.start_recording(self._tape, format=self._format)
-        self._is_recording = True
+        if not self._is_recording:
+            logging.info("start recording, saving at {}".format(self._folder))
+            self._tape.save_at(self._folder)
+            self._camera.start_recording(self._tape, format=self._format)
+            self._is_recording = True
 
     def _stop_recording(self):
-        self._camera.stop_recording()
-        self._tape.close()
-        self._is_recording = False
+        if self._is_recording:
+            self._camera.stop_recording()
+            self._tape.close()
+            self._is_recording = False
+            logging.info("stop recording")
 
     def process_event(self):
         if not self._event_queue.empty():
             event = self._event_queue.get()
             event.execute(self)
 
-    def run(self):
-        self._start_recording()
+    def run(self, start_recording=True):
+        if start_recording:
+            self._start_recording()
         while True:
             if self._is_recording:
                 self._camera.wait_recording(1)
@@ -75,5 +74,5 @@ class CameraRecorder(object):
                 self.process_event()
                 time.sleep(0.05)
 
-    def notify(self, motion_detection):
-        self._event_queue.put(MotionEvent())
+    def notify(self, event):
+        self._event_queue.put(event)
