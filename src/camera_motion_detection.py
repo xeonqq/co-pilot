@@ -32,14 +32,13 @@ class CameraMotionDetection(object):
             obs.notify_on_motion(self)
 
     def _run(self):
-        while True:
+        for _ in self._camera.capture_continuous(
+            self._stream,
+            format="yuv",
+            resize=self._capture_resolution,
+            use_video_port=True,
+        ):
             start = time.perf_counter()
-            self._camera.capture(
-                self._stream,
-                format="yuv",
-                resize=self._capture_resolution,
-                use_video_port=True,
-            )
             self._stream.truncate()
             self._stream.seek(0)
             Y = np.frombuffer(
@@ -48,7 +47,5 @@ class CameraMotionDetection(object):
             if self._motion_detector.has_motion_in_image(Y):
                 self._notify()
                 logging.debug("motion detected!")
-            logging.debug(
-                "capture+motion: {} ms".format((time.perf_counter() - start) * 1000)
-            )
+            logging.debug("motion: {} ms".format((time.perf_counter() - start) * 1000))
             time.sleep(self._dt)

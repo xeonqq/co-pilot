@@ -81,7 +81,12 @@ def main():
         args.blackbox_path.mkdir(parents=True, exist_ok=True)
 
         log_path = args.blackbox_path.joinpath("co-pilot.log")
-        logging.basicConfig(filename=str(log_path), level=logging.DEBUG)
+        logging.basicConfig(
+            filename=str(log_path),
+            format="%(asctime)s %(levelname)-6s %(message)s",
+            level=logging.DEBUG,
+            datefmt="%Y-%m-%d %H:%M:%S",
+        )
 
         camera_info = CameraInfo("config/intrinsics.yml")
         inference_config = InferenceConfig("config/inference_config.yml")
