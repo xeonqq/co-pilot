@@ -50,13 +50,20 @@ I use [superviser](http://supervisord.org/) to start co-pilot at RPI boot up.
 ```bash
 python3 -m src.dashcam
 ```
+## Run Surveillance mode
+like dashcam mode, but record only if motion is detection
+```bash
+python3 -m src.dashcam --record_on_motion
+```
+Watch how the motion is detected under the hood: 
+![](images/motion_detection.gif)
 
 ## Adjust volume
 Once you've SSH'd into your Pi, type "alsamixer". This will bring up an interface within the terminal which will allow you to set the volume of the Raspberry Pi. Simply press the up and down arrow keys to either increase or decrease the volume. When you are done, press ESC.
 
 ## Test
 ```bash
-# under repo root foler
+# under repo root folder
 python3 -m pytest
 # or
 python3 -m tests.test_detection

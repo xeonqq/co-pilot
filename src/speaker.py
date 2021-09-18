@@ -16,6 +16,9 @@ def get_en_sound_tracks():
         "visibility_clear": pygame.mixer.Sound(
             "./sounds/red-alert/visibility-clear.wav"
         ),
+        "dashcam": pygame.mixer.Sound(
+            "./sounds/red-alert/standing-by.wav"
+        ),
         "dead": pygame.mixer.Sound("./sounds/red-alert/im-gone.wav"),
         "1-up": pygame.mixer.Sound("./sounds/mario/smb_1-up.wav"),
         "green": pygame.mixer.Sound("./sounds/en/green.wav"),
@@ -29,6 +32,9 @@ def get_cn_sound_tracks():
     return {
         "visibility_clear": pygame.mixer.Sound(
             "./sounds/red-alert/visibility-clear.wav"
+        ),
+        "dashcam": pygame.mixer.Sound(
+            "./sounds/red-alert/standing-by.wav"
         ),
         "dead": pygame.mixer.Sound("./sounds/red-alert/im-gone.wav"),
         "1-up": pygame.mixer.Sound("./sounds/mario/smb_1-up.wav"),
@@ -53,11 +59,14 @@ class Speaker(object):
             return
         sound.play()
 
-    def play_dead(self):
-        sound = self._sound_tracks.get("dead", None)
+    def play_sound(self, key, is_blocking=False):
+        sound = self._sound_tracks.get(key, None)
         if not sound:
             return
         channel = sound.play()
+
+        if not is_blocking:
+            return
         while channel.get_busy():
             pass
 

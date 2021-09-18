@@ -19,6 +19,7 @@ class ForegroundDectectionTest(unittest.TestCase):
         params.filterByConvexity = 1
         params.minConvexity = 0.5
         detector = cv.SimpleBlobDetector_create(params)
+        display = False
         if not capture.isOpened():
             print('Unable to open: ' + input_video)
             exit(0)
@@ -31,14 +32,15 @@ class ForegroundDectectionTest(unittest.TestCase):
             fgMask = foreground_detector.apply(frame)
             keypoints = detector.detect(fgMask)
 
-            # uncomment to see demo
-            # im_with_keypoints = cv.drawKeypoints(frame, keypoints, np.array([]), (0,0,255), cv.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
-            # cv.imshow('FG Mask', fgMask)
-            # cv.imshow("Keypoints", im_with_keypoints)
+            if display:
+                im_with_keypoints = cv.drawKeypoints(frame, keypoints, np.array([]), (0, 0, 255),
+                                                     cv.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+                cv.imshow('FG Mask', fgMask)
+                cv.imshow("Keypoints", im_with_keypoints)
 
-            # keyboard = cv.waitKey(30)
-            # if keyboard == 'q' or keyboard == 27:
-            #     break
+                keyboard = cv.waitKey(30)
+                if keyboard == 'q' or keyboard == 27:
+                    break
 
 
 if __name__ == '__main__':

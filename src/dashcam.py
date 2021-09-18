@@ -9,6 +9,7 @@ from .os_utils import generate_recording_postfix
 from .camera_recorder import CameraRecorder
 from .camera_info import CameraInfo
 from .led import ILed
+from .speaker import Speaker
 
 
 def parse_arguments():
@@ -80,9 +81,13 @@ def main():
                 camera_motion_detection.add_observer(camera_recorder_controller)
                 start_recording = False
 
+            s = Speaker()
+            s.play_sound("dashcam")
+
             camera_recorder.run(start_recording)
 
     except Exception as e:
+        Speaker().play_sound("dead", is_blocking=True)
         logging.critical(str(e))
         print(str(e))
         exit(1)

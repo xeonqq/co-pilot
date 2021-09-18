@@ -130,8 +130,7 @@ def main():
             copilot.run()
 
     except Exception as e:
-        s = Speaker(args.lang)
-        s.play_dead()
+        Speaker(args.lang).play_sound("dead", is_blocking=True)
         logging.critical(str(e))
         print(str(e))
         exit(1)
