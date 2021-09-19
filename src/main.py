@@ -104,9 +104,7 @@ def main():
             led_pin = 10
             led = Led(led_pin)
             camera_recorder = CameraRecorder(camera, led, args.blackbox_path)
-            camera_capturer = CameraCapturer(
-                camera, 5, camera_recorder.is_recording, pubsub, inference_config
-            )
+            camera_capturer = CameraCapturer(camera, 5, pubsub, inference_config)
             if args.cpu:
                 from tflite_runtime.interpreter import Interpreter as make_interpreter
             else:
