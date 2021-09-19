@@ -21,15 +21,17 @@ class CameraCapturer(object):
         self._thread = threading.Thread(target=self._run, daemon=True)
         self._stream = io.BytesIO()
         self._thread.start()
-        self._start = time.perf_counter()
+        # self._start = time.perf_counter()
 
     def _run(self):
+        # capture time 60-80ms
         for _ in self._camera.capture_continuous(
-                self._stream,
-                format="rgb",
-                resize=self._capture_resolution,
-                use_video_port=True):
-            print("capture : {} ms".format((time.perf_counter() - self._start) * 1000))
+            self._stream,
+            format="rgb",
+            resize=self._capture_resolution,
+            use_video_port=True,
+        ):
+            # print("capture : {} ms".format((time.perf_counter() - self._start) * 1000))
             self._stream.truncate()
             self._stream.seek(0)
             img = Image.frombuffer(
@@ -42,4 +44,4 @@ class CameraCapturer(object):
             logging.debug("exposure_speed:{}".format(self._camera.exposure_speed))
             # print("capture 2: {} ms".format((time.perf_counter() - start)*1000))
             time.sleep(self._dt)
-            self._start = time.perf_counter()
+            # self._start = time.perf_counter()

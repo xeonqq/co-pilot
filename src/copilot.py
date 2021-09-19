@@ -39,10 +39,6 @@ class CoPilot(object):
         self._camera_info = camera_info
         self._inference_config = inference_config
 
-        assert self._camera_info.resolution == (
-            1120,  # 35 * 32, must be multiple of 32
-            624,
-        )  # Y * 16, must be multiple of 16
         self._args = args
         self._pubsub = pubsub
         self._blackbox = blackbox
@@ -62,7 +58,7 @@ class CoPilot(object):
         input_shape = self._ssd_interpreter.get_input_details()[0]["shape"]
         tile_w_overlap, tile_h_overlap = self._inference_config.tile_overlap
         tile_size = self._inference_config.tile_size
-        assert (tile_size == input_shape[1])
+        assert tile_size == input_shape[1]
         self._tile_config = TileConfig(tile_size, tile_w_overlap, tile_h_overlap)
 
         self._ssd_labels = read_label_file(self._args.label) if self._args.label else {}
