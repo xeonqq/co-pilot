@@ -37,7 +37,7 @@ class DashCamTask(ProcessTask):
 class SwitchTaskEvent(object):
     def __init__(self):
         self._tasks = [CoPilotTask(), DashCamTask()]
-        self._current_task_index = 0
+        self._current_task_index = -1
 
     def execute(self):
         self._tasks[self._current_task_index].stop()
