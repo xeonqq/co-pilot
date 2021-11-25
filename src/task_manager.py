@@ -29,7 +29,9 @@ class CoPilotTask(ProcessTask):
 class DashCamTask(ProcessTask):
     def __init__(self):
         ProcessTask.__init__(self, "DashCamTask")
-        self._cmd = """python3 -m src.dashcam --record_on_motion"""
+        self._cmd = (
+            """python3 -m src.dashcam --record_on_motion --blackbox_path=/mnt/hdd"""
+        )
 
 
 class SwitchTaskEvent(object):
