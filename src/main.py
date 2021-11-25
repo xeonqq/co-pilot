@@ -21,6 +21,11 @@ from .speaker import Speaker
 def parse_arguments():
     parser = argparse.ArgumentParser()
     parser.add_argument(
+        "--full_mode",
+        help="enable full alert mode instead of only yellow alert",
+        action="store_true",
+    )
+    parser.add_argument(
         "--lang",
         help="co-pilot voice language",
         default="en",
