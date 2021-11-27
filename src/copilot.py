@@ -18,17 +18,18 @@ from .utils import (
     union_of_intersected_objects,
     Object,
 )
-from .traffic_light_state_adaptor import TrafficLightStateAdaptor
+# from .traffic_light_state_adaptor import TrafficLightStateAdaptor
+from .state_machine import TrafficLightStateAdaptorWithSM as TrafficLightStateAdaptor
 from .tracker import selected_driving_relevant, Tracker
 from .traffic_light import TrafficLight
 
 
 class CoPilot(object):
     def __init__(
-        self,
-        args,
-        pubsub,
-        blackbox,
+            self,
+            args,
+            pubsub,
+            blackbox,
         camera_info,
         inference_config,
         led,
@@ -48,7 +49,7 @@ class CoPilot(object):
         self._blackbox = blackbox
 
         self._tracker = Tracker(inference_config)
-        self._traffic_light_state = TrafficLightStateAdaptor(args.full_mode)
+        self._traffic_light_state = TrafficLightStateAdaptor()
 
         self._ssd_interpreter = ssd_interpreter
         self._ssd_interpreter.allocate_tensors()

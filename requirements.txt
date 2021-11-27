@@ -3,5 +3,5 @@ filterpy==1.4.5
 pygame==2.0.1
 pytest==6.2.3
 PyYAML==5.4.1
+transitions==0.8.10
 opencv-contrib-python-headless==4.4.0.46
-
