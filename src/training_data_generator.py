@@ -26,7 +26,7 @@ def detect_and_extract_objects(args):
 
             name = os.path.basename(image_path)
             name = os.path.splitext(name)[0]
-            copilot.save_cropped_objects(image, objects_by_label, ["traffic"], name)
+            copilot.save_cropped_objects(image, objects_by_label, ["traffic light"], name)
             draw_objects(image, objects_by_label)
             folder = "{}/detections/".format(args.thumbnail_path)
             pathlib.Path(folder).mkdir(parents=True, exist_ok=True)
