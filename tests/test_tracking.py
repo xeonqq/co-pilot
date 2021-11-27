@@ -2,7 +2,6 @@ import unittest
 
 from .context import src
 
-from src.utils import draw_objects
 from tests.test_fixture import TestFixture
 
 
