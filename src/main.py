@@ -2,7 +2,6 @@ import argparse
 import logging
 import pathlib
 import time
-import pygame
 
 import picamera
 

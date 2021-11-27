@@ -21,8 +21,7 @@ class TestDetection(TestFixture):
         image = self.resize_image_to_inference_resolution(image)
 
         objects_by_label = self._copilot.detect(image)
-
-        self.assertTrue(len(objects_by_label["traffic"]) >= 2)
+        self.assertTrue(len(objects_by_label["traffic light"]) >= 2)
         self.assertLess(self._copilot._ssd_infer_time_ms, 1000)
 
         draw_objects(image, objects_by_label)

@@ -112,7 +112,7 @@ class CoPilot(object):
     def process(self, image):
 
         objects_by_label = self.detect(image)
-        self._led_on_given(objects_by_label, "traffic")
+        self._led_on_given(objects_by_label, "traffic light")
 
         traffic_lights = self.classify_traffic_lights(image, objects_by_label)
 
@@ -128,7 +128,7 @@ class CoPilot(object):
         self._blackbox.log(image, traffic_lights, objects_by_label, self._tracker)
 
     def classify_traffic_lights(self, image, objects_by_label):
-        detected_traffic_lights = objects_by_label.get("traffic", [])
+        detected_traffic_lights = objects_by_label.get("traffic light", [])
         object_images = crop_objects(image, detected_traffic_lights)
         traffic_lights = []
         for obj_image, detection in zip(object_images, detected_traffic_lights):
@@ -189,7 +189,7 @@ class CoPilot(object):
                 bbox = reposition_bounding_box(bbox, tile_location)
 
                 label = self._ssd_labels.get(obj.id, "")
-                if label == "traffic":  # care about traffic lights for now
+                if label == "traffic light":  # care about traffic lights for now
                     objects_by_label.setdefault(label, []).append(
                         Object(label, obj.score, bbox)
                     )
