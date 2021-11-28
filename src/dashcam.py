@@ -10,6 +10,8 @@ from .camera_recorder import CameraRecorder
 from .camera_info import CameraInfo
 from .led import ILed
 from .speaker import Speaker
+from .utils import run_periodic
+from .disk_manager import DiskManager
 
 
 def parse_arguments():
@@ -57,6 +59,9 @@ def main():
 
         camera_info = CameraInfo("config/dashcam.yml")
         motion_detection_config = CameraInfo("config/motion_detection_config.yml")
+
+        disk_manager = DiskManager(args.blackbox_path, 0.8)
+        run_periodic(60 * 60, disk_manager.check_and_delete_old_files)
 
         with picamera.PiCamera() as camera:
             # fps for recording

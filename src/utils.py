@@ -1,4 +1,5 @@
 import collections
+import threading
 import numpy as np
 
 from PIL import ImageDraw, Image
@@ -313,3 +314,6 @@ def crop_objects(image, objects):
     return [crop_object(image, obj) for obj in objects]
 
 
+def run_periodic(time_interval, func):
+    func()
+    threading.Timer(time_interval, run_periodic).start()
