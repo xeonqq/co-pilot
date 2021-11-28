@@ -6,6 +6,7 @@ import threading
 
 import picamera
 
+from src.os_utils import generate_recording_postfix
 from .led import Led
 from .camera_capturer import CameraCapturer
 from .camera_recorder import CameraRecorder
@@ -82,8 +83,12 @@ def parse_arguments():
 def main():
     try:
         args = parse_arguments()
+
+        disk_manager = DiskManager(args.blackbox_path, 0.8)
+        run_periodic(60 * 60, disk_manager.check_and_delete_old_files)
+
         args.blackbox_path = pathlib.Path(args.blackbox_path).joinpath(
-            time.strftime("%Y%m%d-%H%M%S")
+            generate_recording_postfix(args.blackbox_path)
         )
         args.blackbox_path.mkdir(parents=True, exist_ok=True)
 
@@ -114,8 +119,6 @@ def main():
             camera_capturer = CameraCapturer(
                 camera, 5, camera_recorder.is_recording, pubsub, inference_config
             )
-            disk_manager = DiskManager(args.blackbox_path, 0.8)
-            run_periodic(60 * 60, disk_manager.check_and_delete_old_files)
 
             if args.cpu:
                 from tflite_runtime.interpreter import Interpreter as make_interpreter

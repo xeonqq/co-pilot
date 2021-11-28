@@ -44,6 +44,9 @@ def parse_arguments():
 def main():
     try:
         args = parse_arguments()
+        disk_manager = DiskManager(args.blackbox_path, 0.8)
+        run_periodic(60 * 60, disk_manager.check_and_delete_old_files)
+
         args.blackbox_path = pathlib.Path(args.blackbox_path).joinpath(
             generate_recording_postfix(args.blackbox_path)
         )
@@ -60,8 +63,6 @@ def main():
         camera_info = CameraInfo("config/dashcam.yml")
         motion_detection_config = CameraInfo("config/motion_detection_config.yml")
 
-        disk_manager = DiskManager(args.blackbox_path, 0.8)
-        run_periodic(60 * 60, disk_manager.check_and_delete_old_files)
 
         with picamera.PiCamera() as camera:
             # fps for recording
