@@ -85,7 +85,7 @@ def main():
         args = parse_arguments()
 
         disk_manager = DiskManager(args.blackbox_path, 0.8)
-        run_periodic(60 * 60, disk_manager.check_and_delete_old_files)
+        run_periodic(15 * 60, disk_manager.check_and_delete_old_files)
 
         args.blackbox_path = pathlib.Path(args.blackbox_path).joinpath(
             generate_recording_postfix(args.blackbox_path)
