@@ -2,6 +2,7 @@ import argparse
 import logging
 import pathlib
 import time
+import threading
 
 import picamera
 
@@ -15,6 +16,8 @@ from .copilot import CoPilot
 from .image_saver import AsyncImageSaver
 from .blackbox import BlackBox
 from .speaker import Speaker
+from .utils import run_periodic
+from .disk_manager import DiskManager
 
 
 def parse_arguments():
@@ -111,6 +114,9 @@ def main():
             camera_capturer = CameraCapturer(
                 camera, 5, camera_recorder.is_recording, pubsub, inference_config
             )
+            disk_manager = DiskManager(args.blackbox_path, 0.8)
+            run_periodic(60 * 60, disk_manager.check_and_delete_old_files)
+
             if args.cpu:
                 from tflite_runtime.interpreter import Interpreter as make_interpreter
             else:
