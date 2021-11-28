@@ -316,4 +316,4 @@ def crop_objects(image, objects):
 
 def run_periodic(time_interval, func):
     func()
-    threading.Timer(time_interval, run_periodic).start()
+    threading.Timer(time_interval, lambda: run_periodic(time_interval, func)).start()
