@@ -24,13 +24,13 @@ from .disk_manager import DiskManager
 def parse_arguments():
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--full_mode",
-        help="enable full alert mode instead of only yellow alert",
-        action="store_true",
+        "--mode",
+        help="select 'full' (full alert mode) or 'minimal' (yellow alert)",
+        default='minimal'
     )
     parser.add_argument(
         "--lang",
-        help="co-pilot voice language",
+        help="co-pilot voice language 'en' or 'cn'",
         default="en",
     )
     parser.add_argument(
