@@ -39,6 +39,7 @@ RUN apt-get install -y python3-tflite-runtime
 
 ADD requirements.txt /tmp/requirements.txt
 RUN python3 -m pip install --no-cache-dir -r /tmp/requirements.txt
+RUN python3 -m pip install --no-cache-dir opencv-contrib-python==4.4.0.46
 
 ARG DEBIAN_FRONTEND=noninteractive
 ENV TZ=Europe/Berlin
