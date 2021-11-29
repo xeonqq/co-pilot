@@ -33,6 +33,9 @@ def get_cn_sound_tracks():
         "visibility_clear": pygame.mixer.Sound(
             "./sounds/red-alert/visibility-clear.wav"
         ),
+        "speed_to_full": pygame.mixer.Sound(
+            "./sounds/red-alert/speed-to-full.wav"
+        ),
         "dashcam": pygame.mixer.Sound(
             "./sounds/red-alert/standing-by.wav"
         ),
@@ -53,11 +56,10 @@ class Speaker(object):
         self._last_played_time = 0
         self._prev_sound_key = None
 
-    def play_ready(self):
-        sound = self._sound_tracks.get("visibility_clear", None)
-        if not sound:
-            return
-        sound.play()
+    def play_ready(self, mode):
+        self.play_sound("visibility_clear")
+        if mode == 'full':
+            self.play_sound('speed_to_full')
 
     def play_sound(self, key, is_blocking=False):
         sound = self._sound_tracks.get(key, None)
