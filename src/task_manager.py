@@ -1,4 +1,5 @@
 import queue
+import argparse
 import time
 import subprocess
 from .button import Button
@@ -21,22 +22,30 @@ class ProcessTask(object):
 
 
 class CoPilotTask(ProcessTask):
-    def __init__(self):
+    def __init__(self, args):
         ProcessTask.__init__(self, "SwitchTaskEvent")
-        self._cmd = """python3 -m src.main  --ssd_model models/ssd_mobilenet_v2_coco_quant_no_nms_edgetpu.tflite  --label models/coco_labels.txt --score_threshold 0.3 --traffic_light_classification_model models/traffic_light_edgetpu.tflite  --traffic_light_label models/traffic_light_labels.txt"""
+        self._cmd = """python3 -m src.main  --ssd_model models/ssd_mobilenet_v2_coco_quant_no_nms_edgetpu.tflite  --label models/coco_labels.txt --score_threshold 0.3 --traffic_light_classification_model models/traffic_light_edgetpu.tflite  --traffic_light_label models/traffic_light_labels.txt --blackbox_path={} --mode=full""".format(
+            args.blackbox_path)
+
+
+class CoPilotTaskMinimal(ProcessTask):
+    def __init__(self, args):
+        ProcessTask.__init__(self, "SwitchTaskEvent")
+        self._cmd = """python3 -m src.main  --ssd_model models/ssd_mobilenet_v2_coco_quant_no_nms_edgetpu.tflite  --label models/coco_labels.txt --score_threshold 0.3 --traffic_light_classification_model models/traffic_light_edgetpu.tflite  --traffic_light_label models/traffic_light_labels.txt --blackbox_path={} --mode=minimal""".format(
+            args.blackbox_path)
 
 
 class DashCamTask(ProcessTask):
-    def __init__(self):
+    def __init__(self, args):
         ProcessTask.__init__(self, "DashCamTask")
         self._cmd = (
-            """python3 -m src.dashcam --record_on_motion --blackbox_path=/mnt/hdd"""
+            """python3 -m src.dashcam --record_on_motion --blackbox_path={}""".format(args.blackbox_path)
         )
 
 
 class SwitchTaskEvent(object):
-    def __init__(self):
-        self._tasks = [CoPilotTask(), DashCamTask()]
+    def __init__(self, args):
+        self._tasks = [CoPilotTaskMinimal(args), CoPilotTask(args), DashCamTask(args)]
         self._current_task_index = -1
 
     def execute(self):
@@ -46,12 +55,12 @@ class SwitchTaskEvent(object):
 
 
 class TaskManager(object):
-    def __init__(self):
+    def __init__(self, args):
         self._button = Button(8)
         self._led = Led(10)
         self._button.add_pressed_cb(self._switch_task)
         self._events = queue.Queue(1)
-        self._switch_task_event = SwitchTaskEvent()
+        self._switch_task_event = SwitchTaskEvent(args)
 
     def _switch_task(self, pin):
         self._events.put(self._switch_task_event)
@@ -70,6 +79,15 @@ class TaskManager(object):
             time.sleep(1)
 
 
+def parse_arguments():
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--blackbox_path",
+        help="Output path for blackbox (images, detections, video)",
+    )
+    return parser.parse_args()
+
+
 if __name__ == "__main__":
-    tm = TaskManager()
+    tm = TaskManager(parse_arguments())
     tm.run()

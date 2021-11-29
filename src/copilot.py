@@ -49,7 +49,7 @@ class CoPilot(object):
         self._blackbox = blackbox
 
         self._tracker = Tracker(inference_config)
-        self._traffic_light_state = TrafficLightStateAdaptor()
+        self._traffic_light_state = TrafficLightStateAdaptor(args.mode)
 
         self._ssd_interpreter = ssd_interpreter
         self._ssd_interpreter.allocate_tensors()
@@ -81,7 +81,7 @@ class CoPilot(object):
         self._traffic_light_infer_time_ms = 0
         # button_pin = 8
         # button = Button(button_pin)
-        self._speaker.play_ready()
+        self._speaker.play_ready(args.mode)
         logging.info("Starting jounery on {}".format(time.strftime("%Y%m%d-%H%M%S")))
 
     def stop(self):

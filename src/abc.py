@@ -21,5 +21,5 @@ class ISpeaker(object):
     def play(self, *args):
         pass
 
-    def play_ready(self):
+    def play_ready(self, *args):
         pass
