@@ -1,4 +1,5 @@
 import time
+import logging
 from transitions import Machine, State
 
 
@@ -28,13 +29,11 @@ class TrafficLightDetectionToSound(object):
         self._machine.add_transition('on_yellow', 'implausible', 'yellow')
 
         # real transitions
-        self._machine.add_transition('on_green', ['none', 'red'], 'green', after='green_go')
         self._machine.add_transition('on_green', ['red_yellow'], 'green')
         self._machine.add_transition('on_green', ['yellow'], 'implausible')
 
         self._machine.add_transition('on_red', ['yellow'], 'red')
         self._machine.add_transition('on_red', ['green', 'red_yellow'], 'implausible')
-        self._machine.add_transition('on_red', ['none'], 'red', after='attention_red')
 
         self._machine.add_transition('on_yellow', ['none', 'green'], 'yellow', after='no_rush')
         self._machine.add_transition('on_yellow', ['red', 'red_yellow'], 'implausible')
@@ -71,9 +70,30 @@ class TrafficLightDetectionToSound(object):
         return self._sound_track
 
 
-class TrafficLightStateAdaptorWithSM(object):
+class TrafficLightDetectionToSoundFull(TrafficLightDetectionToSound):
     def __init__(self):
-        self._state_machine = TrafficLightDetectionToSound()
+        TrafficLightDetectionToSound.__init__(self)
+        self._machine.add_transition('on_green', ['none', 'red'], 'green', after='green_go')
+        self._machine.add_transition('on_red', ['none'], 'red', after='attention_red')
+
+
+class TrafficLightDetectionToSoundMinimal(TrafficLightDetectionToSound):
+    def __init__(self):
+        TrafficLightDetectionToSound.__init__(self)
+        self._machine.add_transition('on_green', ['red'], 'green', after='green_go')
+        self._machine.add_transition('on_green', ['none'], 'green')
+        self._machine.add_transition('on_red', ['none'], 'red')
+
+
+class TrafficLightStateAdaptorWithSM(object):
+    def __init__(self, mode='minimal'):
+        if mode is 'minimal':
+            self._state_machine = TrafficLightDetectionToSoundMinimal()
+        elif mode is 'full':
+            self._state_machine = TrafficLightDetectionToSoundFull()
+        else:
+            logging.debug("unsupported mode {}, use minimal instead".format(mode))
+            self._state_machine = TrafficLightDetectionToSoundMinimal()
 
         # do not distinguish left right
         self._state_to_trigger = {

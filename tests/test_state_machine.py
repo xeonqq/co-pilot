@@ -2,13 +2,12 @@ import unittest
 import time
 
 from .context import src
-from src.state_machine import TrafficLightDetectionToSound, TrafficLightStateAdaptorWithSM
+from src.state_machine import TrafficLightDetectionToSoundFull, TrafficLightStateAdaptorWithSM
 
 
 class TestStateMachine(unittest.TestCase):
     def setUp(self):
-        self._state_machine = TrafficLightDetectionToSound()
-        self._state_adaptor = TrafficLightStateAdaptorWithSM()
+        self._state_machine = TrafficLightDetectionToSoundFull()
 
     def test_from_initial_to_green_to_green(self):
         self._state_machine.on_green()
@@ -46,6 +45,11 @@ class TestStateMachine(unittest.TestCase):
         self.assertEqual(None, self._state_machine.sound_track)
         self._state_machine.on_red()
         self.assertEqual(None, self._state_machine.sound_track)
+
+
+class TestStateAdatpor(unittest.TestCase):
+    def setUp(self):
+        self._state_adaptor = TrafficLightStateAdaptorWithSM('full')
 
     def test_state_adapter_with_cool_down_time(self):
         sound = self._state_adaptor.update('green')
