@@ -57,9 +57,10 @@ class Speaker(object):
         self._prev_sound_key = None
 
     def play_ready(self, mode):
-        self.play_sound("visibility_clear")
         if mode == 'full':
             self.play_sound('speed_to_full')
+        else:
+            self.play_sound("visibility_clear")
 
     def play_sound(self, key, is_blocking=False):
         sound = self._sound_tracks.get(key, None)
