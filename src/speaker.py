@@ -16,6 +16,9 @@ def get_en_sound_tracks():
         "visibility_clear": pygame.mixer.Sound(
             "./sounds/red-alert/visibility-clear.wav"
         ),
+        "speed_to_full": pygame.mixer.Sound(
+            "./sounds/red-alert/speed-to-full.wav"
+        ),
         "dashcam": pygame.mixer.Sound(
             "./sounds/red-alert/standing-by.wav"
         ),
