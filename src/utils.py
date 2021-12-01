@@ -1,4 +1,5 @@
 import collections
+import logging
 import threading
 import numpy as np
 
@@ -314,6 +315,7 @@ def crop_objects(image, objects):
     return [crop_object(image, obj) for obj in objects]
 
 
-def run_periodic(time_interval, func):
-    func()
-    threading.Timer(time_interval, lambda: run_periodic(time_interval, func)).start()
+def run_periodic(func):
+    time_interval = func()
+    logging.debug("disk check scheduled {}s later".format(time_interval))
+    threading.Timer(time_interval, lambda: run_periodic(func)).start()
