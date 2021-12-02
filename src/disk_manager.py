@@ -11,6 +11,7 @@ class DiskManager(object):
         self._folder = folder
         self._rest_space_threshold_to_start_delete = available_space_threshold_to_start_delete
         self._max_space_occupation_per_min = 100.0 * 1024.0 * 1024.0  # 100M
+        self._minimum_check_interval = 3.0  # sec, prevent checking too frequent at boundary condition
 
     def get_available_space(self):
         op = subprocess.check_output(['df',
@@ -20,8 +21,9 @@ class DiskManager(object):
         return available_space
 
     def get_next_time_interval_to_check(self, current_available_space):
-        return (
-                           current_available_space - self._rest_space_threshold_to_start_delete) / self._max_space_occupation_per_min * 60.0
+        next_time_interval_to_check = (
+                                                  current_available_space - self._rest_space_threshold_to_start_delete) / self._max_space_occupation_per_min * 60.0
+        return max(next_time_interval_to_check, self._minimum_check_interval)
 
     def check_and_delete_old_files(self):
         available_space = self.get_available_space()
