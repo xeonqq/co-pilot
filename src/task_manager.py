@@ -3,7 +3,6 @@ import argparse
 import time
 import subprocess
 from .button import Button
-from .led import Led
 
 
 class ProcessTask(object):
@@ -18,6 +17,7 @@ class ProcessTask(object):
             self._proc.wait(5)
 
     def run(self):
+        print("start {}".format(self._name))
         self._proc = subprocess.Popen(self._cmd.split())
 
 
@@ -48,31 +48,35 @@ class SwitchTaskEvent(object):
         self._tasks = [CoPilotTaskMinimal(args), CoPilotTask(args), DashCamTask(args)]
         self._current_task_index = -1
 
-    def execute(self):
+    def next(self):
         self._tasks[self._current_task_index].stop()
         self._current_task_index = (self._current_task_index + 1) % len(self._tasks)
+
+    def execute(self):
         self._tasks[self._current_task_index].run()
 
 
 class TaskManager(object):
     def __init__(self, args):
         self._button = Button(8)
-        self._led = Led(10)
         self._button.add_pressed_cb(self._switch_task)
-        self._events = queue.Queue(1)
+        self._events = queue.Queue(3)
         self._switch_task_event = SwitchTaskEvent(args)
 
     def _switch_task(self, pin):
         self._events.put(self._switch_task_event)
 
     def _process_event(self):
-        if not self._events.empty():
-            self._led.off()
+        evt = None
+        while not self._events.empty():
             evt = self._events.get()
+            evt.next()
+        if evt:
             evt.execute()
 
     def run(self):
         # first run the default task
+        self._switch_task_event.next()
         self._switch_task_event.execute()
         while True:
             self._process_event()
