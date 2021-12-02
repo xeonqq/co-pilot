@@ -87,9 +87,9 @@ class TrafficLightDetectionToSoundMinimal(TrafficLightDetectionToSound):
 
 class TrafficLightStateAdaptorWithSM(object):
     def __init__(self, mode):
-        if mode is 'minimal':
+        if mode == 'minimal':
             self._state_machine = TrafficLightDetectionToSoundMinimal()
-        elif mode is 'full':
+        elif mode == 'full':
             self._state_machine = TrafficLightDetectionToSoundFull()
         else:
             logging.debug("unsupported mode {}, use minimal instead".format(mode))
