@@ -85,8 +85,6 @@ def main():
         args = parse_arguments()
 
         recording_root = args.blackbox_path
-        disk_manager = DiskManager(recording_root, 100 * 1024 * 1024)
-        run_periodic(disk_manager.check_and_delete_old_files)
 
         args.blackbox_path = pathlib.Path(args.blackbox_path).joinpath(
             generate_recording_postfix(args.blackbox_path)
@@ -100,6 +98,9 @@ def main():
             level=logging.DEBUG,
             datefmt="%Y-%m-%d %H:%M:%S",
         )
+
+        disk_manager = DiskManager(recording_root, 100 * 1024 * 1024)
+        run_periodic(disk_manager.check_and_delete_old_files)
 
         camera_info = CameraInfo("config/intrinsics.yml")
         inference_config = InferenceConfig("config/inference_config.yml")
