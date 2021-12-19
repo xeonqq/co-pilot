@@ -35,7 +35,6 @@ class TrafficLightDetectionToSound(object):
         self._machine.add_transition('on_red', ['yellow'], 'red')
         self._machine.add_transition('on_red', ['green', 'red_yellow'], 'implausible')
 
-        self._machine.add_transition('on_yellow', ['none', 'green'], 'yellow', after='no_rush')
         self._machine.add_transition('on_yellow', ['red', 'red_yellow'], 'implausible')
 
         self._machine.add_transition('on_red_yellow', ['red', 'none'], 'red_yellow', after='ready_go')
@@ -75,6 +74,7 @@ class TrafficLightDetectionToSoundFull(TrafficLightDetectionToSound):
         TrafficLightDetectionToSound.__init__(self)
         self._machine.add_transition('on_green', ['none', 'red'], 'green', after='green_go')
         self._machine.add_transition('on_red', ['none'], 'red', after='attention_red')
+        self._machine.add_transition('on_yellow', ['none', 'green'], 'yellow', after='no_rush')
 
 
 class TrafficLightDetectionToSoundMinimal(TrafficLightDetectionToSound):
@@ -83,6 +83,8 @@ class TrafficLightDetectionToSoundMinimal(TrafficLightDetectionToSound):
         self._machine.add_transition('on_green', ['red'], 'green', after='green_go')
         self._machine.add_transition('on_green', ['none'], 'green')
         self._machine.add_transition('on_red', ['none'], 'red')
+        self._machine.add_transition('on_yellow', ['green'], 'yellow', after='no_rush')
+        self._machine.add_transition('on_yellow', ['none'], 'yellow')
 
 
 class TrafficLightStateAdaptorWithSM(object):
