@@ -20,7 +20,7 @@ def generate_big_random_bin_file(filename, size):
 
 # To execute the test, run 'create_loop_fs.sh' and uncomment the skip
 # In the end run 'clean_loop_fs.sh'
-# @pytest.mark.skip(reason="can not mount loop fs on CI")
+@pytest.mark.skip(reason="can not mount loop fs on CI")
 class TestDiskManager(unittest.TestCase):
     def setUp(self):
         self._recording_folder = "tests/loopfs"
