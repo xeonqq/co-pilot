@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.com/xeonqq/co-pilot.svg?branch=master)](https://travis-ci.com/xeonqq/co-pilot)
 
-<h2 align="center">Co-Pilot</h2>
+![](images/logo.png)
 
 Traffic light alert and Dashcam all in one.
 
@@ -58,6 +58,12 @@ python3 -m src.dashcam --record_on_motion
 ```
 Watch how the motion is detected under the hood: 
 ![](images/motion_detection.gif)
+
+## Run task manager to be able to select any mode
+```bash
+python3 -m src.task_manager --blackbox_path=/mnt/hdd
+```
+A detailed description of the mode selection can be found [here](https://github.com/xeonqq/copilot-manual/blob/master/manual.pdf).
 
 ## Adjust volume
 Once you've SSH'd into your Pi, type "alsamixer". This will bring up an interface within the terminal which will allow you to set the volume of the Raspberry Pi. Simply press the up and down arrow keys to either increase or decrease the volume. When you are done, press ESC.
