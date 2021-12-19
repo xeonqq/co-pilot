@@ -19,6 +19,7 @@ class TestFixture(unittest.TestCase):
         args.label = "models/coco_labels.txt"
         args.score_threshold = 0.3
         args.iou_threshold = 0.1
+        args.mode = "full"
 
         args.traffic_light_label = "models/traffic_light_labels.txt"
         args.traffic_light_classification_threshold = 0.5
