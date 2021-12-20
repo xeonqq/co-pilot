@@ -34,6 +34,11 @@ def parse_arguments():
     )
 
     parser.add_argument(
+        "--no_speaker",
+        action="store_true",
+    )
+
+    parser.add_argument(
         "--record_on_motion",
         action="store_true",
         help="Only record if motion is detected in the scene",
@@ -89,8 +94,10 @@ def main():
                 camera_motion_detection.add_observer(camera_recorder_controller)
                 start_recording = False
 
-            s = Speaker()
-            s.play_sound("dashcam")
+            if not args.no_speaker:
+                s = Speaker()
+                logging.debug("speaker")
+                s.play_sound("dashcam")
 
             camera_recorder.run(start_recording)
 
