@@ -32,7 +32,7 @@ class DiskManager(object):
         else:
             logging.debug("Disk available space < {}M".format(available_space / (1024.0 * 1024.0)))
 
-            folders = [f for f in Path(self._folder).glob('*') if re.search(r'^2\d{7}-\d{6}$', f.name)]
+            folders = [f for f in Path(self._folder).glob('*') if re.search(r'^\d{8}-\d{6}$', f.name)]
             folders = sorted(folders)
             if len(folders) == 0:
                 raise Exception("Space less than {}M for reoording".format(available_space / (1024.0 * 1024.0)))
