@@ -33,5 +33,5 @@ def generate_recording_postfix(folder):
                 new_count = 0
                 f.seek(0)
                 f.write(str(new_count))
-        postfix = str(new_count)
+        postfix = time.strftime("%Y%m%d-%H%M%S") + "-" + str(new_count)
     return postfix
