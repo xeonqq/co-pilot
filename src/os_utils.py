@@ -2,6 +2,7 @@ import os
 import pathlib
 import subprocess
 import time
+import datetime
 
 
 def is_rtc_available():
@@ -33,5 +34,6 @@ def generate_recording_postfix(folder):
                 new_count = 0
                 f.seek(0)
                 f.write(str(new_count))
-        postfix = time.strftime("%Y%m%d-%H%M%S") + "-" + str(new_count)
+        t = datetime.datetime.fromtimestamp(new_count)
+        postfix = t.strftime("%Y%m%d-%H%M%S")
     return postfix
