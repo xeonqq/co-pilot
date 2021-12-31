@@ -1,5 +1,4 @@
-[![Build Status](https://travis-ci.com/xeonqq/co-pilot.svg?branch=master)](https://travis-ci.com/xeonqq/co-pilot)
-
+[![Build Status](https://app.travis-ci.com/xeonqq/co-pilot.svg?branch=master)](https://app.travis-ci.com/xeonqq/co-pilot)
 ![](images/logo.png)
 
 Traffic light alert and Dashcam all in one.
