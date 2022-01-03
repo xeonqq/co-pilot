@@ -1,0 +1,9 @@
+name: 'CoPilot'
+description: 'test CoPilot'
+outputs:
+  results: # id of output
+    description: 'results of tests'
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  entrypoint: './test.sh'
