@@ -1,0 +1,12 @@
+on: [push]
+
+jobs:
+  test_job:
+    runs-on: ubuntu-latest
+    name: A job to test CoPilot
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: test copilot action step
+        uses: ./ # Uses an action in the root directory
+        id: test-copilot

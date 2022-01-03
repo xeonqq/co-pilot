@@ -45,4 +45,6 @@ ARG DEBIAN_FRONTEND=noninteractive
 ENV TZ=Europe/Berlin
 RUN apt-get install -y python3-tk
 
+COPY . .
+
 EXPOSE 5005
