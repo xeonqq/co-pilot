@@ -4,20 +4,38 @@ Traffic light alert and Dashcam all in one.
 
 `Co-Pilot` = Raspberrypi 3/4 + rpi camera + Google Coral TPU. Language support English/中文.
 
- <a class="bmc-button" target="_blank" href="https://www.buymeacoffee.com/xeonqq"><img src="https://cdn.buymeacoffee.com/buttons/bmc-new-btn-logo.svg" alt="Buy me a coffee 😇"><span style="margin-left:5px;font-size:19px !important;">Buy me a coffee 😇</span></a>
  
-![](images/traffic_light_detection_seq.gif)
+## Features
+  * Real time traffic light voice alert based on situation.
+  * HD dashcam recording.
+  * Surveillance mode, records only when motion is detected.
+  * Auto deletion of old files when disk full.
+  * One button for mode selection.
+  
+ <a class="bmc-button" target="_blank" href="https://www.buymeacoffee.com/xeonqq"><img src="https://cdn.buymeacoffee.com/buttons/bmc-new-btn-logo.svg" alt="Buy me a coffee 😇"><span style="margin-left:5px;font-size:19px !important;">Buy me a coffee 😇</span></a>
+   
 ## Watch the demo in car
 [![Watch the demo in car](https://i.imgur.com/1PCb91b.png)](https://youtu.be/tCmUoWLdjoo)
 
-## Hardware Setup
-![](images/hardware.jpg)
+  What Co-Pilot sees | Voice alerts based situation
+ -------- | -------- 
+  ![](images/traffic_light_detection_seq.gif) | *Ready-go / Green-go-go-go / Attention-red / Yellow-no-rush*
 
+## Hardware Setup
+
+
+ Version | Front | Back
+ -------- | -------- | --------
+ v0.1 | ![](images/hardware.jpg)  |
+ v0.2: using [min speaker](https://de.aliexpress.com/item/1005003107656299.html?spm=a2g0o.productlist.0.0.19bff4543zIpil&algo_pvid=84ba9ca6-b578-4f5f-bc2f-84c493d38095&algo_exp_id=84ba9ca6-b578-4f5f-bc2f-84c493d38095-31&pdp_ext_f=%7B%22sku_id%22%3A%2212000024125609922%22%7D&pdp_pi=-1%3B3.5%3B-1%3B-1%40salePrice%3BEUR%3Bsearch-mainSearch) | ![](https://github.com/xeonqq/copilot-manual/blob/master/pics/front_small.jpg?raw=true)| ![](https://github.com/xeonqq/copilot-manual/blob/master/pics/back_small.jpg?raw=true)
+ v0.3: [custom designed housing](https://www.thingiverse.com/thing:5187983) | ![3d printable housing ](https://github.com/xeonqq/openscad_designs/blob/master/pi3_case/pics/front.jpg?raw=true) | ![3d printable housing](https://github.com/xeonqq/openscad_designs/blob/master/pi3_case/pics/back.jpg?raw=true)
+ 
 optional: [RTC DS3231](https://www.ebay.de/itm/223727782675?ssPageName=STRK%3AMEBIDX%3AIT&_trksid=p2060353.m2749.l2649), to have correct date on the dashcam video and log.
 
 ## Limitations
 * Currently works only with vertically placed traffic lights, optimized for Germany.
 * Delay of ~0.3 sec for each detection (Rpi 4 might have better performance, didn't have one to test)
+* Performance drops during night
 
 ## Dependencies
 ```bash on rpi
@@ -55,13 +73,14 @@ like dashcam mode, but record only if motion is detection
 python3 -m src.dashcam --record_on_motion
 ```
 Watch how the motion is detected under the hood: 
+
 ![](images/motion_detection.gif)
 
 ## Run task manager to be able to select any mode
 ```bash
 python3 -m src.task_manager --blackbox_path=/mnt/hdd
 ```
-A detailed description of the mode selection can be found [here](https://github.com/xeonqq/copilot-manual/blob/master/manual.pdf).
+A detailed description of the mode selection can be found in [user manual](https://github.com/xeonqq/copilot-manual/blob/master/manual.pdf).
 
 ## Adjust volume
 Once you've SSH'd into your Pi, type "alsamixer". This will bring up an interface within the terminal which will allow you to set the volume of the Raspberry Pi. Simply press the up and down arrow keys to either increase or decrease the volume. When you are done, press ESC.
