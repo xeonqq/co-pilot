@@ -17,7 +17,7 @@ Traffic light alert and Dashcam all in one.
 ## Watch the demo in car
 [![Watch the demo in car](https://i.imgur.com/1PCb91b.png)](https://youtu.be/tCmUoWLdjoo)
 
-  What Co-Pilot sees | Voice alerts based situation
+  What Co-Pilot sees | Voice alerts based on situation
  -------- | -------- 
   ![](images/traffic_light_detection_seq.gif) | *Ready-go / Green-go-go-go / Attention-red / Yellow-no-rush*
 
