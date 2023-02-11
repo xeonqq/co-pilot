@@ -1,8 +1,16 @@
-[![.github/workflows/main.yml](https://github.com/xeonqq/co-pilot/actions/workflows/main.yml/badge.svg)](https://github.com/xeonqq/co-pilot/actions/workflows/main.yml)
+<h1>
+<p align="center">
+  <img src="images/logo.png" alt="Logo" width="239" height="63">
+</h1>
+  <p align="center">
+  Traffic light alert and Dashcam all in one.
 
-Traffic light alert and Dashcam all in one.
+  `Co-Pilot` = Raspberrypi 3/4 + rpi camera + Google Coral TPU. Language support English/中文.
+    <br />
+    </p>
+</p>
 
-`Co-Pilot` = Raspberrypi 3/4 + rpi camera + Google Coral TPU. Language support English/中文.
+## [![.github/workflows/main.yml](https://github.com/xeonqq/co-pilot/actions/workflows/main.yml/badge.svg)](https://github.com/xeonqq/co-pilot/actions/workflows/main.yml)
 
  
 ## Features
