@@ -21,6 +21,7 @@
   * One button for mode selection.
   
  <a class="bmc-button" target="_blank" href="https://www.buymeacoffee.com/xeonqq"><img src="https://cdn.buymeacoffee.com/buttons/bmc-new-btn-logo.svg" alt="Buy me a coffee 😇"><span style="margin-left:5px;font-size:19px !important;">Buy me a coffee 😇</span></a>
+ <a class="bmc-button" target="_blank" href="https://paypal.me/xeonqq"><img src="https://raw.githubusercontent.com/stefan-niedermann/paypal-donate-button/master/paypal-donate-button.png" width="200" height="77" alt="Donate with PayPal">
    
 ## Watch the demo in car
 [![Watch the demo in car](https://i.imgur.com/1PCb91b.png)](https://youtu.be/tCmUoWLdjoo)
