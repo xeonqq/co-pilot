@@ -4,10 +4,10 @@ import pathlib
 import time
 import threading
 
-import picamera
+from picamera2 import Picamera2
 
 from src.os_utils import generate_recording_postfix
-from .led import Led
+from .abc import ILed
 from .camera_capturer import CameraCapturer
 from .camera_recorder import CameraRecorder
 from .pubsub import PubSub
@@ -109,43 +109,48 @@ def main():
 
         blackbox = BlackBox(image_saver)
 
-        with picamera.PiCamera() as camera:
-            # fps for recording
-            camera.framerate = 20
-            camera.resolution = camera_info.resolution
-            camera.exposure_mode = "sports"
+        camera = Picamera2()
 
-            led_pin = 10
-            led = Led(led_pin)
-            camera_recorder = CameraRecorder(camera, led, args.blackbox_path)
-            camera_capturer = CameraCapturer(
-                camera, 5, camera_recorder.is_recording, pubsub, inference_config
+
+        main_stream = {"size": camera_info.resolution}
+        lores_stream = {"size": inference_config.inference_resolution}
+        video_config = camera.create_video_configuration(main_stream, lores_stream, encode="main")
+        camera.configure(video_config)
+
+        #camera.framerate = 20
+        #camera.exposure_mode = "sports"
+
+        led_pin = 10
+        led = ILed()
+        camera_recorder = CameraRecorder(camera, led, args.blackbox_path)
+        camera_capturer = CameraCapturer(
+            camera, 5, camera_recorder.is_recording, pubsub, inference_config
+        )
+
+        if args.cpu:
+            from tflite_runtime.interpreter import Interpreter as make_interpreter
+        else:
+            from pycoral.utils.edgetpu import make_interpreter
+
+        try:
+            copilot = CoPilot(
+                args,
+                pubsub,
+                blackbox,
+                camera_info,
+                inference_config,
+                led,
+                Speaker(args.lang),
+                make_interpreter(args.ssd_model),
+                make_interpreter(args.traffic_light_classification_model),
             )
-
-            if args.cpu:
-                from tflite_runtime.interpreter import Interpreter as make_interpreter
-            else:
-                from pycoral.utils.edgetpu import make_interpreter
-
-            try:
-                copilot = CoPilot(
-                    args,
-                    pubsub,
-                    blackbox,
-                    camera_info,
-                    inference_config,
-                    led,
-                    Speaker(args.lang),
-                    make_interpreter(args.ssd_model),
-                    make_interpreter(args.traffic_light_classification_model),
-                )
-            except ValueError as e:
-                print(str(e) + "Use --cpu if you do not have a coral tpu")
-                return
-            copilot.run()
+        except ValueError as e:
+            print(str(e) + "Use --cpu if you do not have a coral tpu")
+            return
+        copilot.run()
 
     except Exception as e:
-        Speaker(args.lang).play_sound("dead", is_blocking=True)
+        # Speaker(args.lang).play_sound("dead", is_blocking=True)
         logging.critical(str(e))
         print(str(e))
         exit(1)

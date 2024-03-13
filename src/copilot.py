@@ -3,10 +3,10 @@ import time
 
 from PIL import Image
 
-from pycoral.adapters import common
-from pycoral.adapters import detect
-from pycoral.adapters import classify
-from pycoral.utils.dataset import read_label_file
+# from pycoral.adapters import common
+# from pycoral.adapters import detect
+# from pycoral.adapters import classify
+# from pycoral.utils.dataset import read_label_file
 
 # from .button import Button
 from .utils import (
@@ -56,7 +56,7 @@ class CoPilot(object):
 
         self._classfication_interpreter = traffic_light_classifier_interpreter
         self._classfication_interpreter.allocate_tensors()
-        self._traffic_light_size = common.input_size(self._classfication_interpreter)
+        # self._traffic_light_size = common.input_size(self._classfication_interpreter)
 
         self._speaker = speaker
 
@@ -66,12 +66,12 @@ class CoPilot(object):
         assert tile_size == input_shape[1]
         self._tile_config = TileConfig(tile_size, tile_w_overlap, tile_h_overlap)
 
-        self._ssd_labels = read_label_file(self._args.label) if self._args.label else {}
-        self._traffic_light_labels = (
-            read_label_file(self._args.traffic_light_label)
-            if self._args.traffic_light_label
-            else {}
-        )
+        # self._ssd_labels = read_label_file(self._args.label) if self._args.label else {}
+        # self._traffic_light_labels = (
+            # read_label_file(self._args.traffic_light_label)
+            # if self._args.traffic_light_label
+            # else {}
+        # )
 
         self._h_crop_keep_percentage = 0.6
         self._led = led
@@ -97,7 +97,7 @@ class CoPilot(object):
             )
             prev_cycle_time = current_cycle_time
             logging.debug("recv image from: {}".format(image_time))
-            self.process(image)
+            # self.process(image)
             logging.debug(
                 "process time: %.2f ms"
                 % ((time.perf_counter() - current_cycle_time) * 1000)
@@ -142,7 +142,7 @@ class CoPilot(object):
         traffic_light_resized = traffic_light_thumbnail.resize(
             self._traffic_light_size, Image.ANTIALIAS
         )
-        common.set_input(self._classfication_interpreter, traffic_light_resized)
+        # common.set_input(self._classfication_interpreter, traffic_light_resized)
         start = time.perf_counter()
         self._classfication_interpreter.invoke()
         classes = classify.get_classes(
@@ -179,7 +179,7 @@ class CoPilot(object):
         ):
             # print(tile_location)
             tile = img.crop(tile_location)
-            common.set_input(self._ssd_interpreter, tile)
+            # common.set_input(self._ssd_interpreter, tile)
             start = time.perf_counter()
             self._ssd_interpreter.invoke()
             inference_time += time.perf_counter() - start
