@@ -3,7 +3,7 @@ import time
 import queue
 import logging
 from .tape import Tape
-
+from picamera2.encoders import H264Encoder
 
 class StartEvent(object):
     def execute(self, camera_recorder):
@@ -25,13 +25,15 @@ class CameraRecorder(object):
         self._tape = Tape(self.fps, self._format)
         self._is_recording = False
         self._event_queue = queue.Queue()
+        self._encoder = H264Encoder(10000000)
+
         if daemon:
             self._thread = threading.Thread(target=self.run, daemon=True)
             self._thread.start()
 
-    @property
+    @property #fixme
     def fps(self):
-        return self._camera.framerate
+        return 20 #self._camera.framerate
 
     def is_recording(self):
         return self._is_recording
@@ -46,7 +48,7 @@ class CameraRecorder(object):
         if not self._is_recording:
             logging.info("start recording, saving at {}".format(self._folder))
             self._tape.save_at(self._folder)
-            self._camera.start_recording(self._tape, format=self._format)
+            self._camera.start_recording(self._encoder, self._tape)
             self._is_recording = True
 
     def _stop_recording(self):
@@ -66,13 +68,13 @@ class CameraRecorder(object):
             self._start_recording()
         while True:
             if self._is_recording:
-                self._camera.wait_recording(1)
-                self._led.toggle()
+                # self._camera.wait_recording(1)
+                # self._led.toggle()
                 self.process_event()
-            else:
-                self._led.off()
-                self.process_event()
-                time.sleep(0.05)
+            # else:
+                # self._led.off()
+                # self.process_event()
+                time.sleep(0.5)
 
     def notify(self, event):
         self._event_queue.put(event)
