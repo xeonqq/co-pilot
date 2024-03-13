@@ -2,8 +2,9 @@ import threading
 import time
 import queue
 import logging
-from .tape import Tape
+# from .tape import Tape
 from picamera2.encoders import H264Encoder
+from picamera2.outputs import FfmpegOutput
 
 class StartEvent(object):
     def execute(self, camera_recorder):
@@ -21,19 +22,28 @@ class CameraRecorder(object):
         self._folder.mkdir(parents=True, exist_ok=True)
         self._camera = camera
         self._led = led
-        self._format = "h264"
-        self._tape = Tape(self.fps, self._format)
+        # self._tape = Tape(self.fps, self._format)
         self._is_recording = False
         self._event_queue = queue.Queue()
         self._encoder = H264Encoder(10000000)
 
+        filepath = "{}/recording_{}_%03d.mp4".format(
+            self._folder, time.strftime("%Y%m%d-%H%M%S")
+        )
+        ffmpeg_cmd = """-v 16 -framerate {0} -f {1}
+                                    -i pipe:0 -codec copy 
+                                    -movflags faststart
+                                    -segment_time 00:01:00 -f segment -reset_timestamps 1
+                                    -y {2}""".format(
+                                            self.fps, "h264", filepath)
+        self._tape = FfmpegOutput(self._ffmpeg_cmd)
         if daemon:
             self._thread = threading.Thread(target=self.run, daemon=True)
             self._thread.start()
 
     @property #fixme
     def fps(self):
-        return 20 #self._camera.framerate
+        return self._camera.video_configuration.controls.FrameRate
 
     def is_recording(self):
         return self._is_recording
@@ -47,7 +57,7 @@ class CameraRecorder(object):
     def _start_recording(self):
         if not self._is_recording:
             logging.info("start recording, saving at {}".format(self._folder))
-            self._tape.save_at(self._folder)
+            # self._tape.save_at(self._folder)
             self._camera.start_recording(self._encoder, self._tape)
             self._is_recording = True
 

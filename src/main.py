@@ -117,6 +117,11 @@ def main():
         video_config = camera.create_video_configuration(main_stream, lores_stream, encode="main")
         camera.configure(video_config)
 
+        camera.set_controls({"FrameRate": 20})
+        metadata = camera.capture_metadata()
+        logging.info("metadata")
+        logging.info(metadata)
+
         #camera.framerate = 20
         #camera.exposure_mode = "sports"
 
