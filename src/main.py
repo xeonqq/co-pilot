@@ -7,7 +7,8 @@ import threading
 from picamera2 import Picamera2
 
 from src.os_utils import generate_recording_postfix
-from .abc import ILed
+from .abc import ILed as Led
+from .abc import ISpeaker as Speaker
 from .camera_capturer import CameraCapturer
 from .camera_recorder import CameraRecorder
 from .pubsub import PubSub
@@ -16,9 +17,12 @@ from .inference_config import InferenceConfig
 from .copilot import CoPilot
 from .image_saver import AsyncImageSaver
 from .blackbox import BlackBox
-from .speaker import Speaker
+#from .speaker import Speaker
 from .utils import run_periodic
 from .disk_manager import DiskManager
+
+def make_interpreter(model_path):
+    pass
 
 
 def parse_arguments():
@@ -111,31 +115,38 @@ def main():
 
         camera = Picamera2()
 
-
         main_stream = {"size": camera_info.resolution}
-        lores_stream = {"size": inference_config.inference_resolution}
+        lores_stream = {"size": inference_config.inference_resolution, "format": "RGB888"}
         video_config = camera.create_video_configuration(main_stream, lores_stream, encode="main")
         camera.configure(video_config)
+        fps = 20.0
+        camera.set_controls({"FrameRate": fps, "ExposureTime": 20000})
 
-        camera.set_controls({"FrameRate": 20})
-        metadata = camera.capture_metadata()
-        logging.info("metadata")
-        logging.info(metadata)
+        #metadata = camera.capture_metadata()
+
+        #print("here 4")
+        #framerate = 1000000 / metadata["FrameDuration"]
+        #print("here 5")
+
+        #logging.debug("configure camera done, fps: {}".format(framerate))
+
 
         #camera.framerate = 20
         #camera.exposure_mode = "sports"
 
         led_pin = 10
-        led = ILed()
-        camera_recorder = CameraRecorder(camera, led, args.blackbox_path)
+        led = Led()
+        camera_recorder = CameraRecorder(camera, fps, led, args.blackbox_path)
         camera_capturer = CameraCapturer(
             camera, 5, camera_recorder.is_recording, pubsub, inference_config
         )
 
         if args.cpu:
-            from tflite_runtime.interpreter import Interpreter as make_interpreter
+            #from tflite_runtime.interpreter import Interpreter as make_interpreter
+            pass
         else:
-            from pycoral.utils.edgetpu import make_interpreter
+            #from pycoral.utils.edgetpu import make_interpreter
+            pass
 
         try:
             copilot = CoPilot(

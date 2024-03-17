@@ -18,6 +18,9 @@ class IBlackBox(object):
 
 
 class ISpeaker(object):
+    def __init__(self, *args):
+        pass
+
     def play(self, *args):
         pass
 

@@ -52,19 +52,19 @@ class CoPilot(object):
         self._traffic_light_state = TrafficLightStateAdaptor(args.mode)
 
         self._ssd_interpreter = ssd_interpreter
-        self._ssd_interpreter.allocate_tensors()
+        #self._ssd_interpreter.allocate_tensors()
 
         self._classfication_interpreter = traffic_light_classifier_interpreter
-        self._classfication_interpreter.allocate_tensors()
+        #self._classfication_interpreter.allocate_tensors()
         # self._traffic_light_size = common.input_size(self._classfication_interpreter)
 
         self._speaker = speaker
 
-        input_shape = self._ssd_interpreter.get_input_details()[0]["shape"]
+        #input_shape = self._ssd_interpreter.get_input_details()[0]["shape"]
         tile_w_overlap, tile_h_overlap = self._inference_config.tile_overlap
         tile_size = self._inference_config.tile_size
-        assert tile_size == input_shape[1]
-        self._tile_config = TileConfig(tile_size, tile_w_overlap, tile_h_overlap)
+        #assert tile_size == input_shape[1]
+        #self._tile_config = TileConfig(tile_size, tile_w_overlap, tile_h_overlap)
 
         # self._ssd_labels = read_label_file(self._args.label) if self._args.label else {}
         # self._traffic_light_labels = (
@@ -98,6 +98,8 @@ class CoPilot(object):
             prev_cycle_time = current_cycle_time
             logging.debug("recv image from: {}".format(image_time))
             # self.process(image)
+            self._blackbox.log_image(image)
+            
             logging.debug(
                 "process time: %.2f ms"
                 % ((time.perf_counter() - current_cycle_time) * 1000)

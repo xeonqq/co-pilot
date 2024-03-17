@@ -5,6 +5,9 @@ class BlackBox(object):
     def __init__(self, image_saver):
         self._image_saver = image_saver
 
+    def log_image(self, image):
+        self._image_saver.save_image(image)
+
     def log(self, image, traffic_lights, objects_by_label, tracker):
 
         # save image with detection overlay,

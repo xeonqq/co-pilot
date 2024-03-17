@@ -15,35 +15,32 @@ class StopEvent(object):
     def execute(self, camera_recorder):
         camera_recorder._stop_recording()
 
-
 class CameraRecorder(object):
-    def __init__(self, camera, led, recording_folder, daemon=True):
+    def __init__(self, camera, fps, led, recording_folder, daemon=True):
         self._folder = recording_folder
         self._folder.mkdir(parents=True, exist_ok=True)
         self._camera = camera
         self._led = led
+        self._fps = fps
         # self._tape = Tape(self.fps, self._format)
         self._is_recording = False
         self._event_queue = queue.Queue()
         self._encoder = H264Encoder(10000000)
 
-        filepath = "{}/recording_{}_%03d.mp4".format(
+        filepath = "{}/recording_{}.mp4".format(
             self._folder, time.strftime("%Y%m%d-%H%M%S")
         )
-        ffmpeg_cmd = """-v 16 -framerate {0} -f {1}
-                                    -i pipe:0 -codec copy 
-                                    -movflags faststart
-                                    -segment_time 00:01:00 -f segment -reset_timestamps 1
-                                    -y {2}""".format(
-                                            self.fps, "h264", filepath)
-        self._tape = FfmpegOutput(self._ffmpeg_cmd)
+        self._tape = FfmpegOutput(filepath)
         if daemon:
             self._thread = threading.Thread(target=self.run, daemon=True)
             self._thread.start()
 
-    @property #fixme
+    @property
     def fps(self):
-        return self._camera.video_configuration.controls.FrameRate
+        return self._fps
+        #metadata = self._camera.capture_metadata()
+        #framerate = 1000000 / metadata["FrameDuration"]
+        #return framerate
 
     def is_recording(self):
         return self._is_recording
@@ -64,7 +61,7 @@ class CameraRecorder(object):
     def _stop_recording(self):
         if self._is_recording:
             self._camera.stop_recording()
-            self._tape.close()
+            #self._tape.close()
             self._is_recording = False
             logging.info("stop recording")
 
@@ -75,6 +72,7 @@ class CameraRecorder(object):
 
     def run(self, start_recording=True):
         if start_recording:
+            logging.info("start camera recording")
             self._start_recording()
         while True:
             if self._is_recording:
