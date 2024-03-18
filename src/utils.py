@@ -2,6 +2,7 @@ import collections
 import logging
 import threading
 import numpy as np
+import re
 
 from PIL import ImageDraw, Image
 
@@ -319,3 +320,31 @@ def run_periodic(func):
     time_interval = func()
     logging.debug("disk check scheduled {}s later".format(time_interval))
     threading.Timer(time_interval, lambda: run_periodic(func)).start()
+
+
+def read_label_file(file_path):
+    """Reads labels from a text file and returns it as a dictionary.
+
+    This function supports label files with the following formats:
+
+    + Each line contains id and description separated by colon or space.
+      Example: ``0:cat`` or ``0 cat``.
+    + Each line contains a description only. The returned label id's are based on
+      the row number.
+
+    Args:
+      file_path (str): path to the label file.
+
+    Returns:
+      Dict of (int, string) which maps label id to description.
+    """
+    with open(file_path, 'r', encoding='utf-8') as f:
+        lines = f.readlines()
+    ret = {}
+    for row_number, content in enumerate(lines):
+        pair = re.split(r'[:\s]+', content.strip(), maxsplit=1)
+        if len(pair) == 2 and pair[0].strip().isdigit():
+            ret[int(pair[0])] = pair[1].strip()
+        else:
+            ret[row_number] = content.strip()
+    return ret

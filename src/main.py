@@ -21,9 +21,6 @@ from .blackbox import BlackBox
 from .utils import run_periodic
 from .disk_manager import DiskManager
 
-def make_interpreter(model_path):
-    pass
-
 
 def parse_arguments():
     parser = argparse.ArgumentParser()
@@ -142,7 +139,7 @@ def main():
         )
 
         if args.cpu:
-            #from tflite_runtime.interpreter import Interpreter as make_interpreter
+            from tflite_runtime.interpreter import Interpreter as make_interpreter
             pass
         else:
             #from pycoral.utils.edgetpu import make_interpreter

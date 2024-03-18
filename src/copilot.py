@@ -3,21 +3,23 @@ import time
 
 from PIL import Image
 
-# from pycoral.adapters import common
-# from pycoral.adapters import detect
+from .adapters import common,detect,classify
+# from pycoral.adapters import 
 # from pycoral.adapters import classify
 # from pycoral.utils.dataset import read_label_file
 
 # from .button import Button
+import numpy as np
 from .utils import (
-    crop_objects,
-    tiles_location_gen,
-    non_max_suppression,
-    reposition_bounding_box,
-    TileConfig,
-    union_of_intersected_objects,
-    Object,
-)
+        crop_objects,
+        tiles_location_gen,
+        non_max_suppression,
+        reposition_bounding_box,
+        TileConfig,
+        union_of_intersected_objects,
+        read_label_file,
+        Object,
+        )
 # from .traffic_light_state_adaptor import TrafficLightStateAdaptor
 from .state_machine import TrafficLightStateAdaptorWithSM as TrafficLightStateAdaptor
 from .tracker import selected_driving_relevant, Tracker
@@ -52,26 +54,26 @@ class CoPilot(object):
         self._traffic_light_state = TrafficLightStateAdaptor(args.mode)
 
         self._ssd_interpreter = ssd_interpreter
-        #self._ssd_interpreter.allocate_tensors()
+        self._ssd_interpreter.allocate_tensors()
 
         self._classfication_interpreter = traffic_light_classifier_interpreter
-        #self._classfication_interpreter.allocate_tensors()
-        # self._traffic_light_size = common.input_size(self._classfication_interpreter)
+        self._classfication_interpreter.allocate_tensors()
+        self._traffic_light_size = common.input_size(self._classfication_interpreter)
 
         self._speaker = speaker
 
-        #input_shape = self._ssd_interpreter.get_input_details()[0]["shape"]
+        input_shape = self._ssd_interpreter.get_input_details()[0]["shape"]
         tile_w_overlap, tile_h_overlap = self._inference_config.tile_overlap
         tile_size = self._inference_config.tile_size
-        #assert tile_size == input_shape[1]
-        #self._tile_config = TileConfig(tile_size, tile_w_overlap, tile_h_overlap)
+        assert tile_size == input_shape[1]
+        self._tile_config = TileConfig(tile_size, tile_w_overlap, tile_h_overlap)
 
-        # self._ssd_labels = read_label_file(self._args.label) if self._args.label else {}
-        # self._traffic_light_labels = (
-            # read_label_file(self._args.traffic_light_label)
-            # if self._args.traffic_light_label
-            # else {}
-        # )
+        self._ssd_labels = read_label_file(self._args.label) if self._args.label else {}
+        self._traffic_light_labels = (
+            read_label_file(self._args.traffic_light_label)
+            if self._args.traffic_light_label
+            else {}
+        )
 
         self._h_crop_keep_percentage = 0.6
         self._led = led
@@ -97,7 +99,7 @@ class CoPilot(object):
             )
             prev_cycle_time = current_cycle_time
             logging.debug("recv image from: {}".format(image_time))
-            # self.process(image)
+            self.process(image)
             # self._blackbox.log_image(image)
             
             logging.debug(
@@ -144,7 +146,7 @@ class CoPilot(object):
         traffic_light_resized = traffic_light_thumbnail.resize(
             self._traffic_light_size, Image.ANTIALIAS
         )
-        # common.set_input(self._classfication_interpreter, traffic_light_resized)
+        common.set_input(self._classfication_interpreter, traffic_light_resized)
         start = time.perf_counter()
         self._classfication_interpreter.invoke()
         classes = classify.get_classes(
@@ -181,11 +183,13 @@ class CoPilot(object):
         ):
             # print(tile_location)
             tile = img.crop(tile_location)
-            # common.set_input(self._ssd_interpreter, tile)
+            common.set_input(self._ssd_interpreter, tile)
+
             start = time.perf_counter()
             self._ssd_interpreter.invoke()
             inference_time += time.perf_counter() - start
             objs = detect.get_objects(self._ssd_interpreter, self._args.score_threshold)
+
             for obj in objs:
                 bbox = [obj.bbox.xmin, obj.bbox.ymin, obj.bbox.xmax, obj.bbox.ymax]
                 bbox = reposition_bounding_box(bbox, tile_location)
