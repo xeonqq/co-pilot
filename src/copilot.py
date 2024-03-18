@@ -98,7 +98,7 @@ class CoPilot(object):
             prev_cycle_time = current_cycle_time
             logging.debug("recv image from: {}".format(image_time))
             # self.process(image)
-            self._blackbox.log_image(image)
+            # self._blackbox.log_image(image)
             
             logging.debug(
                 "process time: %.2f ms"
