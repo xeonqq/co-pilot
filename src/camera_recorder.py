@@ -26,11 +26,11 @@ class CameraRecorder(object):
         self._is_recording = False
         self._event_queue = queue.Queue()
         self._encoder = H264Encoder(10000000)
-
-        filepath = "{}/recording_{}.mp4".format(
+        filepath = "{}/recording_{}_%03d.mp4".format(
             self._folder, time.strftime("%Y%m%d-%H%M%S")
         )
-        self._tape = FfmpegOutput(filepath)
+        options = "-movflags faststart -segment_time 00:01:00 -f segment -reset_timestamps 1 -y "
+        self._tape = FfmpegOutput(options + filepath)
         if daemon:
             self._thread = threading.Thread(target=self.run, daemon=True)
             self._thread.start()
