@@ -5,6 +5,7 @@ import time
 import threading
 
 from picamera2 import Picamera2
+from libcamera import controls
 
 from src.os_utils import generate_recording_postfix
 from .abc import ILed as Led
@@ -117,8 +118,9 @@ def main():
         video_config = camera.create_video_configuration(main_stream, lores_stream, encode="main")
         camera.configure(video_config)
         fps = 20.0
-        camera.set_controls({"FrameRate": fps, "ExposureTime": 20000})
-
+        camera.set_controls({"FrameRate": fps, "ExposureTime": 10000})
+        camera.set_controls({"AfMode":controls.AfModeEnum.Continuous})
+        
         #metadata = camera.capture_metadata()
         #framerate = 1000000 / metadata["FrameDuration"]
         #logging.debug("configure camera done, fps: {}".format(framerate))
