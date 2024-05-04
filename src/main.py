@@ -120,6 +120,8 @@ def main():
         fps = 20.0
         camera.set_controls({"FrameRate": fps, "ExposureTime": 10000})
         camera.set_controls({"AfMode":controls.AfModeEnum.Continuous})
+        camera.set_controls({"AwbEnable": True})
+        camera.set_controls({"AwbMode": controls.AwbModeEnum.Daylight})
         
         #metadata = camera.capture_metadata()
         #framerate = 1000000 / metadata["FrameDuration"]
