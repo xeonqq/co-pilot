@@ -122,5 +122,14 @@ Both main and reprocess can be run without Coral TPU by specifying --cpu option.
 ## References
 * SSD model is downloaded from https://github.com/google-coral/test_data/blob/master/ssd_mobilenet_v2_coco_quant_postprocess_edgetpu.tflite
 
+## Bluetooth Speaker on Rpi5
+To fix Connection Failed: br-connection-profile-unavailable
+
+```bash
+sudo apt install pipewire pipewire-pulse pipewire-jack pipewire-alsa pipewire-audio
+sudo apt install libspa-0.2-bluetooth
+sudo systemctl restart bluetooth.service
+systemctl --user restart pipewire.service
+```
 
 

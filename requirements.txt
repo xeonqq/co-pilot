@@ -4,3 +4,4 @@ pygame
 pytest
 PyYAML
 transitions
+pipewire_python

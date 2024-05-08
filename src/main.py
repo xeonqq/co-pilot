@@ -9,7 +9,6 @@ from libcamera import controls
 
 from src.os_utils import generate_recording_postfix
 from .abc import ILed as Led
-from .abc import ISpeaker as Speaker
 from .camera_capturer import CameraCapturer
 from .camera_recorder import CameraRecorder
 from .pubsub import PubSub
@@ -18,7 +17,7 @@ from .inference_config import InferenceConfig
 from .copilot import CoPilot
 from .image_saver import AsyncImageSaver
 from .blackbox import BlackBox
-#from .speaker import Speaker
+from .speaker import Speaker
 from .utils import run_periodic
 from .disk_manager import DiskManager
 
@@ -161,7 +160,7 @@ def main():
         copilot.run()
 
     except Exception as e:
-        # Speaker(args.lang).play_sound("dead", is_blocking=True)
+        Speaker(args.lang).play_sound("dead", is_blocking=True)
         logging.critical(str(e))
         print(str(e))
         exit(1)
