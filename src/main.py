@@ -17,7 +17,6 @@ from .inference_config import InferenceConfig
 from .copilot import CoPilot
 from .image_saver import AsyncImageSaver
 from .blackbox import BlackBox
-from .speaker import Speaker
 from .utils import run_periodic
 from .disk_manager import DiskManager
 
@@ -137,10 +136,17 @@ def main():
 
         if args.cpu:
             from tflite_runtime.interpreter import Interpreter as make_interpreter
-            pass
         else:
             from pycoral.utils.edgetpu import make_interpreter
-            pass
+
+        speaker = None
+        try:
+            from .speaker import Speaker
+            speaker = Speaker(args.lang)
+        except Exception as e:
+            from .abc import ISpeaker
+            speaker = ISpeaker(args.lang)
+            logging.critical(str(e))
 
         try:
             copilot = CoPilot(
@@ -150,7 +156,7 @@ def main():
                 camera_info,
                 inference_config,
                 led,
-                Speaker(args.lang),
+                speaker,
                 make_interpreter(args.ssd_model),
                 make_interpreter(args.traffic_light_classification_model),
             )
@@ -160,6 +166,7 @@ def main():
         copilot.run()
 
     except Exception as e:
+        from .speaker import Speaker
         Speaker(args.lang).play_sound("dead", is_blocking=True)
         logging.critical(str(e))
         print(str(e))
